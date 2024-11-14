@@ -2,7 +2,7 @@ import java.util.List;
 
 public class GameLogic implements PlayableLogic{
     private Disc[][] board;
-    private int
+    private int hg;//KG??
     public GameLogic (){
         this.board=new Disc[8][8];
     }
