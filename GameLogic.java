@@ -5,12 +5,15 @@ public class GameLogic implements PlayableLogic {
     private Disc[][] board;
     private Player player1;
     private Player player2;
+    private final boolean isPlayeroneturn;
 
     public GameLogic() {
         this.board = new Disc[8][8];
         this.player1 = new HumanPlayer(true);
         this.player2 = new HumanPlayer(false) ;
+        this.isPlayeroneturn =true;
     }
+
     @Override
     public boolean locate_disc(Position a, Disc disc) {
         return false;
@@ -126,7 +129,7 @@ public class GameLogic implements PlayableLogic {
 
     @Override
     public boolean isFirstPlayerTurn() {
-        return false;
+        return isPlayeroneturn;
     }
 
     @Override
@@ -136,6 +139,7 @@ public class GameLogic implements PlayableLogic {
 
     @Override
     public void reset() {
+        reset();
 
     }
 
