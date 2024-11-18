@@ -5,7 +5,8 @@ public class GameLogic implements PlayableLogic {
     private Disc[][] board;
     private Player player1;
     private Player player2;
-    private final boolean isPlayeroneturn;
+    private boolean isPlayeroneturn;
+
 
     public GameLogic() {
         this.board = new Disc[8][8];
@@ -16,7 +17,16 @@ public class GameLogic implements PlayableLogic {
 
     @Override
     public boolean locate_disc(Position a, Disc disc) {
-        return false;
+        List<Position> listopthion = ValidMoves();
+        boolean contain= listopthion.contains(a);
+        if (contain) {
+            board[a.row()][a.col()] = disc;
+            isPlayeroneturn = !isPlayeroneturn;
+            return true;
+        }
+        else
+            return false;
+
     }
 
     @Override
@@ -134,7 +144,8 @@ public class GameLogic implements PlayableLogic {
 
     @Override
     public boolean isGameFinished() {
-        return false;
+        
+
     }
 
     @Override
