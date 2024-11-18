@@ -1,25 +1,65 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Stack;
 
 public class GameLogic implements PlayableLogic {
-    private Disc[][] board = new Disc[8][];
+    private final Disc[][] board = new Disc[8][8];
     private Player player1;
     private Player player2;
     private boolean isPlayeroneturn;
+    private final int[][] directions = {
+            {-1, -1}, {-1, 0}, {-1, 1},
+            {0, -1}        , {0, 1},
+            {1, -1}, {1, 0}, {1, 1}
+    };
+    private Stack <Move> moves;
 
 
     public GameLogic() {
-        this.board = new Disc[8][8];
         this.player1 = new HumanPlayer(true);
         this.player2 = new HumanPlayer(false) ;
         this.isPlayeroneturn =true;
     }
 
+    public GameLogic(Player player1,Player player2){
+        this.player1=player1;
+        this.player2=player2;
+        this.isPlayeroneturn =true;
+
+    }
+    public void Bomb (Position bomb){
+        for (int[] direction : directions) {
+            int rowDir = direction[0];
+            int colDir = direction[1];
+            int row = bomb.row() + rowDir;
+            int col = bomb.col() + colDir;
+            Disc disc = getDiscAtPosition(new Position(row, col));
+            if (disc != null && disc.getOwner().isPlayerOne != isFirstPlayerTurn()) {
+                if (Objects.equals(disc.getOwner(), player1)) {
+                    board[row][col].setOwner(player2);
+                }
+                else
+                    board[row][col].setOwner(player1);
+
+
+
+            }
+
+
+
+        }}
+    public void flip(){
+
+    }
+
     @Override
     public boolean locate_disc(Position a, Disc disc) {
-        List<Position> listopthion = ValidMoves();
-        boolean contain= listopthion.contains(a);
-        if (contain) {
+        if ( ValidMoves().contains(a)) {
+            if (Objects.equals(disc.getType(), "💣"))
+                Bomb(a);
+            else
+                flip();
             board[a.row()][a.col()] = disc;
             isPlayeroneturn = !isPlayeroneturn;
             return true;
@@ -66,11 +106,6 @@ public class GameLogic implements PlayableLogic {
             return false;
         }
 
-        int[][] directions = {
-                {-1, -1}, {-1, 0}, {-1, 1},
-                {0, -1}        , {0, 1},
-                {1, -1}, {1, 0}, {1, 1}
-        };
 
         for (int i = 0; i < directions.length; i++) {
             int rowDir = directions[i][0];
@@ -144,8 +179,10 @@ public class GameLogic implements PlayableLogic {
 
     @Override
     public boolean isGameFinished() {
-        
-
+        if (ValidMoves().isEmpty()){
+            return true;
+        }
+        return false;
     }
 
     @Override
