@@ -2,7 +2,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GameLogic implements PlayableLogic {
-    private Disc[][] board;
+    private Disc[][] board = new Disc[8][];
     private Player player1;
     private Player player2;
     private boolean isPlayeroneturn;
