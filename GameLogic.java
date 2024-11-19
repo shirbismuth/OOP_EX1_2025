@@ -94,13 +94,16 @@ public class GameLogic implements PlayableLogic {//n
 
     @Override
     public boolean locate_disc(Position a, Disc disc) {
-        if (ValidMoves().contains(a)) {
+//        if (ValidMoves().contains(a)) {
+//            if (isPlayeroneturn)
+
+           // else board[a.row()][a.col()]= new SimpleDisc(player2);
             flip(a, disc);
             isPlayeroneturn = !isPlayeroneturn;
             return true;
-        }
-        else
-                return false;
+//        }
+//        else
+//               return false;
 
     }
 
@@ -256,12 +259,16 @@ public class GameLogic implements PlayableLogic {//n
 
     @Override
     public void reset() {
-        reset();
+        board[3][3] = new SimpleDisc((player1));
+        board[4][4] = new SimpleDisc((player1));
+        board[3][4] = new SimpleDisc((player2));
+        board[4][3] = new SimpleDisc((player2));
 
     }
 
     @Override
     public void undoLastMove() {
+
 
     }
 }
