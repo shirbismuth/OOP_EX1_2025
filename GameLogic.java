@@ -153,8 +153,41 @@ public class GameLogic implements PlayableLogic {
 
     @Override
     public int countFlips(Position a) {
-        return 0;
-    }
+            int flips = 0;
+
+            for (int[] direction : directions) {
+                int rowDir = direction[0];
+                int colDir = direction[1];
+                int row = a.row() + rowDir;
+                int col = a.col() + colDir;
+                int count = 0;
+
+
+                while (isWithinBounds(row, col)) {
+                    Disc disc = getDiscAtPosition(new Position(row, col));
+
+
+                    if (disc != null && disc.getOwner().isPlayerOne != isFirstPlayerTurn()) {
+                        count++;
+                    }
+
+                    else if (disc != null && disc.getOwner().isPlayerOne == isFirstPlayerTurn()) {
+                        flips += count;
+                        break;
+                    }
+                    else {
+                        break;
+                    }
+
+                    row += rowDir;
+                    col += colDir;
+                }
+            }
+
+            return flips;
+        }
+
+
 
     @Override
     public Player getFirstPlayer() {
