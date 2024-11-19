@@ -3,7 +3,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Stack;
 
-public class GameLogic implements PlayableLogic {
+public class GameLogic implements PlayableLogic {//n
     private final Disc[][] board = new Disc[8][8];
     private Player player1;
     private Player player2;
