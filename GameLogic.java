@@ -34,19 +34,20 @@ public class GameLogic implements PlayableLogic {
             int colDir = direction[1];
             int row = bomb.row() + rowDir;
             int col = bomb.col() + colDir;
-            Disc disc = getDiscAtPosition(new Position(row, col));
-            if (disc != null && disc.getOwner().isPlayerOne != isFirstPlayerTurn()) {
-                if (Objects.equals(disc.getOwner(), player1)) {
-                    board[row][col].setOwner(player2);
+            if (isWithinBounds(row, col)) {
+                Disc disc = getDiscAtPosition(new Position(row, col));
+                if (disc != null && !Objects.equals(disc.getType(), "⭕") && disc.getOwner().isPlayerOne != isFirstPlayerTurn()) {
+                    if (Objects.equals(disc.getOwner(), player1)) {
+                        board[row][col].setOwner(player2);
+                    } else
+                        board[row][col].setOwner(player1);
+
+
+                }if (Objects.equals(disc.getType(), "💣"){
+                    Bomb(new Position(row, col));
                 }
-                else
-                    board[row][col].setOwner(player1);
-
-
 
             }
-
-
 
         }}
     public void flip(){
