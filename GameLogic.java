@@ -42,10 +42,9 @@ public class GameLogic implements PlayableLogic {
                     } else
                         board[row][col].setOwner(player1);
 
-
-                }if (Objects.equals(disc.getType(), "💣"){
+                }  if (Objects.equals(disc.getType(), "💣"){
                     Bomb(new Position(row, col));
-                }
+                 }
 
             }
 
