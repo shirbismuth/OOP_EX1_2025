@@ -94,18 +94,15 @@ public class GameLogic implements PlayableLogic {//n
 
     @Override
     public boolean locate_disc(Position a, Disc disc) {
-//        if (ValidMoves().contains(a)) {
-//            if (isPlayeroneturn)
-
-           // else board[a.row()][a.col()]= new SimpleDisc(player2);
-            flip(a, disc);
+       // if (ValidMoves().contains(a)) {
+            board[a.row()][a.col()] = disc;
             isPlayeroneturn = !isPlayeroneturn;
-            return true;
-//        }
-//        else
-//               return false;
+        return true;
 
     }
+        //else
+         //   return false;
+
 
 
     @Override
