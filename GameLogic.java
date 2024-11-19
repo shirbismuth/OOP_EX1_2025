@@ -17,7 +17,7 @@ public class GameLogic implements PlayableLogic {//n
 
 
     public GameLogic() {
-        this.player1 = new HumanPlayer(true);
+       this.player1 = new HumanPlayer(true);
         this.player2 = new HumanPlayer(false) ;
         this.isPlayeroneturn =true;
     }

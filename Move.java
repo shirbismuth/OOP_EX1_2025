@@ -23,15 +23,11 @@ public class Move {
     public Disc[][] getBoardmove(){
         return this.boardmove;
     }
-    public Position Position(){
+    public Position position(){
         return this.position;
     }
-    public Disc getDisc(){
-        return this.disc;
-    }
-    public Position position()
-    {return null;
-    }
+    //public Disc getDisc(){return this.disc;}
+
 
     public Disc disc() {
         return null;

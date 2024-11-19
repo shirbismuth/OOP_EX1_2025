@@ -1,9 +1,10 @@
 import javax.swing.*;
-import javax.swing.text.Position;
+//import javax.swing.text.Position;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.util.List;
+
 
 /**
  * IMPORTANT:
@@ -41,7 +42,7 @@ public class GUI_for_chess_like_games extends JFrame {
         if (!currentPlayer.isHuman()) {
 
             Move aiMove = ((AIPlayer) currentPlayer).makeMove(gameLogic);
-            preform_move(aiMove.position(), aiMove.disc());
+            preform_move((Position) aiMove.position(), aiMove.disc());
 
             // Update the current player after the move
             currentPlayer = gameLogic.isFirstPlayerTurn() ? gameLogic.getFirstPlayer() : gameLogic.getSecondPlayer();
