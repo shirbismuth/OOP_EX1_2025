@@ -28,7 +28,8 @@ public class GameLogic implements PlayableLogic {//n
         this.isPlayeroneturn =true;
 
     }
-    public void Bomb (Position bomb){
+
+    public void Bomb(Position bomb) {
         for (int[] direction : directions) {
             int rowDir = direction[0];
             int colDir = direction[1];
@@ -43,30 +44,66 @@ public class GameLogic implements PlayableLogic {//n
                         board[row][col].setOwner(player1);
 
                 }
-                if (Objects.equals(disc.getType(), "💣"))
-                {
+                if (Objects.equals(disc.getType(), "💣")) {
                     Bomb(new Position(row, col));
-                 }
+                }
 
             }
 
-        }}
-    public void flip(){
-
+        }
     }
+
+    public void flip(Position flip, Disc disc) {
+        for (int[] direction : directions) {
+            int rowDir = direction[0];
+            int colDir = direction[1];
+            int row = flip.row() + rowDir;
+            int col = flip.col() + colDir;
+            if (isWithinBounds(row, col) && board[row][col].getOwner() != disc.getOwner()) {
+                if (flipRecursive(row, col, rowDir, colDir, disc)) {
+                    while (board[row][col].getOwner() != disc.getOwner()) {
+                        if (disc.getOwner() == player1) {
+                            board[row][col].setOwner(player1);
+                        } else
+                            board[row][col].setOwner(player2);
+                        if ( Objects.equals( board[row][col].getType(), "💣")){
+                            Bomb(new Position(row ,col));
+                        }
+                        row += rowDir;
+                        col += colDir;
+                    }
+                }
+            }
+        }
+    }
+
+
+    private boolean flipRecursive(int row, int col, int rowDir, int colDir, Disc disc) {
+        if (!isWithinBounds(row, col) || board[row][col] == null) {
+            return false;
+        }
+        if (board[row][col] == disc) {
+            return true;
+        }
+        return flipRecursive(row + rowDir, col + colDir, rowDir, colDir, disc);
+    }
+
+
+
+
 
     @Override
     public boolean locate_disc(Position a, Disc disc) {
-        if ( ValidMoves().contains(a)) {
-                flip();
-            board[a.row()][a.col()] = disc;
+        if (ValidMoves().contains(a)) {
+            flip(a, disc);
             isPlayeroneturn = !isPlayeroneturn;
             return true;
         }
         else
-            return false;
+                return false;
 
     }
+
 
     @Override
     public Disc getDiscAtPosition(Position position) {
