@@ -42,7 +42,9 @@ public class GameLogic implements PlayableLogic {//n
                     } else
                         board[row][col].setOwner(player1);
 
-                }  if (Objects.equals(disc.getType(), "💣"){
+                }
+                if (Objects.equals(disc.getType(), "💣"))
+                {
                     Bomb(new Position(row, col));
                  }
 
@@ -56,9 +58,6 @@ public class GameLogic implements PlayableLogic {//n
     @Override
     public boolean locate_disc(Position a, Disc disc) {
         if ( ValidMoves().contains(a)) {
-            if (Objects.equals(disc.getType(), "💣"))
-                Bomb(a);
-            else
                 flip();
             board[a.row()][a.col()] = disc;
             isPlayeroneturn = !isPlayeroneturn;
