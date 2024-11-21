@@ -7,25 +7,25 @@ public class GameLogic implements PlayableLogic {//n
     private final Disc[][] board = new Disc[8][8];
     private Player player1;
     private Player player2;
-    private boolean isPlayeroneturn;
+    private boolean isPlayeroneturn = true;
     private final int[][] directions = {
             {-1, -1}, {-1, 0}, {-1, 1},
             {0, -1}        , {0, 1},
             {1, -1}, {1, 0}, {1, 1}
     };
-    private Stack <Move> moves;
+    private static Stack <Move> moves;
 
 
     public GameLogic() {
        this.player1 = new HumanPlayer(true);
         this.player2 = new HumanPlayer(false) ;
         this.isPlayeroneturn =true;
+        this.moves= new Stack<Move>();
     }
 
     public GameLogic(Player player1,Player player2){
         this.player1=player1;
         this.player2=player2;
-        this.isPlayeroneturn =true;
 
     }
 
@@ -53,21 +53,21 @@ public class GameLogic implements PlayableLogic {//n
         }
     }
 
-    public void flip(Position flip, Disc disc) {
+    public void flip(Position P, Disc disc) {
         for (int[] direction : directions) {
             int rowDir = direction[0];
             int colDir = direction[1];
-            int row = flip.row() + rowDir;
-            int col = flip.col() + colDir;
-            if (isWithinBounds(row, col) && board[row][col].getOwner() != disc.getOwner()) {
-                if (flipRecursive(row, col, rowDir, colDir, disc)) {
-                    while (board[row][col].getOwner() != disc.getOwner()) {
-                        if (disc.getOwner() == player1) {
-                            board[row][col].setOwner(player1);
-                        } else
-                            board[row][col].setOwner(player2);
-                        if ( Objects.equals( board[row][col].getType(), "💣")){
-                            Bomb(new Position(row ,col));
+            int row = P.row() + rowDir;
+            int col = P.col() + colDir;
+
+            if (isWithinBounds(row, col) && board[row][col] != null && board[row][col].getOwner() != disc.getOwner()) {
+                // Check if discs can be flipped in this direction
+                if (canFlip(row, col, rowDir, colDir, disc)) {
+                    // Flip discs in the direction
+                    while (isWithinBounds(row, col) && board[row][col].getOwner() != disc.getOwner()) {
+                        board[row][col].setOwner(disc.getOwner());
+                        if (board[row][col].getType().equals("💣")) {
+                            Bomb(new Position(row, col));
                         }
                         row += rowDir;
                         col += colDir;
@@ -77,16 +77,83 @@ public class GameLogic implements PlayableLogic {//n
         }
     }
 
-
-    private boolean flipRecursive(int row, int col, int rowDir, int colDir, Disc disc) {
-        if (!isWithinBounds(row, col) || board[row][col] == null) {
-            return false;
+    // Helper Method: Check if discs can be flipped in a specific direction
+    private boolean canFlip(int row, int col, int rowDir, int colDir, Disc disc) {
+        while (isWithinBounds(row, col)) {
+            Disc currentDisc = board[row][col];
+            if (currentDisc == null) return false; // No disc found
+            if (currentDisc.getOwner() == disc.getOwner()) return true; // Valid chain
+            row += rowDir;
+            col += colDir;
         }
-        if (board[row][col] == disc) {
-            return true;
-        }
-        return flipRecursive(row + rowDir, col + colDir, rowDir, colDir, disc);
+        return false;
     }
+
+
+//    public void flip(Position P, Disc disc) {
+//        for (int[] direction : directions) {
+//            int rowDir = direction[0];
+//            int colDir = direction[1];
+//            int row = P.row() + rowDir;
+//            int col = P.col() + colDir;
+//
+//            // Ensure we're not out of bounds and the disc we're checking is not of the same color as the placed disc
+//            if (isWithinBounds(row, col) && board[row][col] != null && board[row][col].getOwner() != disc.getOwner()) {
+//
+//                // Call recursive method to check if this direction has flippable discs
+//                if (flipRecursive(row, col, rowDir, colDir, disc)) {
+//                    // Once we know there's a valid sequence, start flipping the discs
+//                    while (board[row][col].getOwner() != disc.getOwner()) {
+//                        // Flip the discs
+//                        board[row][col].setOwner(disc.getOwner());
+//
+//                        // Check if a bomb is encountered and trigger the Bomb logic
+//                        if (board[row][col].getType().equals("💣")) {
+//                            Bomb(new Position(row, col));
+//                        }
+//
+//                        // Move to the next position in the same direction
+//                        row += rowDir;
+//                        col += colDir;
+//                    }
+//                }
+//            }
+//        }
+//    }
+
+
+//    private boolean flipRecursive(int row, int col, int rowDir, int colDir, Disc disc) {
+//        if (!isWithinBounds(row, col) || board[row][col] == null) {
+//            return false;
+//        }
+//        if (board[row][col] == disc) {
+//            return true;
+//        }
+//        return flipRecursive(row + rowDir, col + colDir, rowDir, colDir, disc);
+//    }
+private boolean flipRecursive(int row, int col, int rowDir, int colDir, Disc disc) {
+    // Base Case: If out of bounds or empty space, terminate recursion
+    if (!isWithinBounds(row, col) || board[row][col] == null) {
+        return false;
+    }
+
+    // Base Case: If we find the current player's disc, sequence is valid
+    if (board[row][col].getOwner().equals(disc.getOwner())) {
+        return true;
+    }
+
+    // Recursive Case: Keep traversing in the current direction
+    if (flipRecursive(row + rowDir, col + colDir, rowDir, colDir, disc)) {
+        // Flip the current disc if recursion returns true
+        board[row][col].setOwner(disc.getOwner());
+        System.out.println("Flipped disc at: (" + row + ", " + col + ")");
+        return true;
+    }
+
+    // If no valid sequence, return false
+    return false;
+}
+
 
 
 
@@ -94,23 +161,39 @@ public class GameLogic implements PlayableLogic {//n
 
     @Override
     public boolean locate_disc(Position a, Disc disc) {
-       // if (ValidMoves().contains(a)) {
-            board[a.row()][a.col()] = disc;
-            isPlayeroneturn = !isPlayeroneturn;
+        if (!isValidMove(a)) return false;
+
+        board[a.row()][a.col()] = disc; // Place the disc
+        flip(a, disc); // Flip the opponent discs
+        isPlayeroneturn = !isPlayeroneturn;// Switch turn
         return true;
-
     }
-        //else
-         //   return false;
 
-
+//    public boolean locate_disc(Position a, Disc disc) {
+//
+//        if (!isValidMove(a))
+//            return false;
+//
+//        if (ValidMoves().contains(a))
+//        {  board[a.row()][a.col()] = disc;
+//
+//            isPlayeroneturn = !isPlayeroneturn;
+//            ValidMoves();
+//            flip(a ,disc);
+//            return true;
+//
+//        }
+//       // this.moves.add()
+//        else
+//           return false;
+//
+//    }
 
     @Override
     public Disc getDiscAtPosition(Position position) {
         int col = position.col();
         int row = position.row();
-        Disc disc = this.board[row][col];
-        return disc;
+        return this.board[row][col];
     }
 
     @Override
@@ -121,12 +204,9 @@ public class GameLogic implements PlayableLogic {//n
     @Override
     public List<Position> ValidMoves() {
         List<Position> validPositions = new ArrayList<>();
-        int boardSize = this.getBoardSize();
-
-        for (int row = 0; row < boardSize; row++) {
-            for (int col = 0; col < boardSize; col++) {
+        for (int row = 0; row < board.length; row++) {
+            for (int col = 0; col < board.length; col++) {
                 Position position = new Position(row, col);
-
                 if (isValidMove(position)) {
                     validPositions.add(position);
                 }
@@ -143,18 +223,20 @@ public class GameLogic implements PlayableLogic {//n
         }
 
 
-        for (int i = 0; i < directions.length; i++) {
-            int rowDir = directions[i][0];
-            int colDir = directions[i][1];
+        for (int[] direction : directions) {
+            int rowDir = direction[0];
+            int colDir = direction[1];
             if (checkDirection(position, rowDir, colDir)) {
                 return true;
             }
         }
 
+
         return false;
     }
 
     private boolean checkDirection(Position position, int rowDir, int colDir) {
+        Player player = isFirstPlayerTurn() ? getFirstPlayer() : getSecondPlayer();
         int row = position.row() + rowDir;
         int col = position.col() + colDir;
         boolean foundOpponentDisc = false;
@@ -162,66 +244,92 @@ public class GameLogic implements PlayableLogic {//n
         while (isWithinBounds(row, col)) {
             Disc disc = getDiscAtPosition(new Position(row, col));
 
+            if (disc == null) break;  // No disc found, invalid direction
 
-            if (disc == null) {
-                return false;
-            }
-
-
-            if (disc.getOwner().isPlayerOne != isFirstPlayerTurn()) {
-                foundOpponentDisc = true;
+            if (!disc.getOwner().equals(player)) {
+                foundOpponentDisc = true;  // Found opponent's disc
+            } else if (foundOpponentDisc) {
+                return true;  // Found player's disc after opponent's, valid move
             } else {
-
-                return foundOpponentDisc;
+                return false;  // Found player's disc without opponent in between
             }
 
             row += rowDir;
             col += colDir;
         }
 
-        return false;
+        return false;  // No valid flip direction
     }
+    @Override
+    public int countFlips(Position a) {
+        int flips = 0;
+        for (int[] direction : directions) {
+            int rowDir = direction[0];
+            int colDir = direction[1];
+            int row = a.row() + rowDir;
+            int col = a.col() + colDir;
+            int count = 0;
+
+            while (isWithinBounds(row, col)) {
+                Disc disc = getDiscAtPosition(new Position(row, col));
+                if (disc == null) break; // No disc, stop counting
+                if (disc.getOwner().isPlayerOne != isFirstPlayerTurn()) {
+                    count++; // Opponent disc found
+                } else {
+                    flips += count; // Player's disc found after opponent discs
+                    break;
+                }
+                row += rowDir;
+                col += colDir;
+            }
+        }
+        return flips;
+    }
+
 
     private boolean isWithinBounds(int row, int col) {
         return row >= 0 && row < this.board.length && col >= 0 && col < this.board[0].length;
     }
 
 
-    @Override
-    public int countFlips(Position a) {
-            int flips = 0;
-
-            for (int[] direction : directions) {
-                int rowDir = direction[0];
-                int colDir = direction[1];
-                int row = a.row() + rowDir;
-                int col = a.col() + colDir;
-                int count = 0;
 
 
-                while (isWithinBounds(row, col)) {
-                    Disc disc = getDiscAtPosition(new Position(row, col));
-
-
-                    if (disc != null && disc.getOwner().isPlayerOne != isFirstPlayerTurn()) {
-                        count++;
-                    }
-
-                    else if (disc != null && disc.getOwner().isPlayerOne == isFirstPlayerTurn()) {
-                        flips += count;
-                        break;
-                    }
-                    else {
-                        break;
-                    }
-
-                    row += rowDir;
-                    col += colDir;
-                }
-            }
-
-            return flips;
-        }
+//    public int countFlips(Position a) {
+//        int flips = 0;
+//
+//        for (int[] direction : directions) {
+//            int rowDir = direction[0];
+//            int colDir = direction[1];
+//            int row = a.row() + rowDir;
+//            int col = a.col() + colDir;
+//            int count = 0;
+//
+//
+//            while (isWithinBounds(row, col)) {
+//                Disc disc = getDiscAtPosition(new Position(row, col));
+//                if (disc == null) break;
+//
+//                if (disc.getOwner().isPlayerOne != isFirstPlayerTurn()) {
+//                    count++;
+//                } else if (disc.getOwner().isPlayerOne == isFirstPlayerTurn()) {
+//                    flips += count;
+//
+//                }
+//
+//                break;
+//            }
+//
+//                row += rowDir;
+//                col += colDir;
+//            }
+//
+//
+//
+//
+//
+//            return flips;
+//
+//        }
 
 
 

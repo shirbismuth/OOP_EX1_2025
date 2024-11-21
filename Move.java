@@ -1,8 +1,8 @@
-import javax.swing.text.Position;
+
 
 public class Move {
     private Position position;
-    private   Disc disc;
+    private  Disc disc;
     private Disc[][] boardmove;
 
 
@@ -11,6 +11,12 @@ public class Move {
         this.position = position;
         this.disc = disc;
     }
+
+    public Move(Position position , Disc disc){
+        this.position = position;
+        this.disc = disc;
+    }
+
     public void  setBoardmove(Disc[][] boardmove){
         this.boardmove = boardmove;
     }
