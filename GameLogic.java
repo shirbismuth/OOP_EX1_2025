@@ -10,7 +10,6 @@ public class GameLogic implements PlayableLogic {//n
     private boolean isPlayeroneturn = true;
     private final int[][] directions = {
             {-1, -1}, {-1, 0}, {-1, 1},
-            {0, -1}        , {0, 1},
             {1, -1}, {1, 0}, {1, 1}
     };
     private static Stack <Move> moves;
@@ -26,7 +25,7 @@ public class GameLogic implements PlayableLogic {//n
     public GameLogic(Player player1,Player player2){
         this.player1=player1;
         this.player2=player2;
-
+        this.moves= new Stack<Move>();
     }
 
     public void Bomb(Position bomb) {
@@ -160,11 +159,11 @@ private boolean flipRecursive(int row, int col, int rowDir, int colDir, Disc dis
 
 
     @Override
-    public boolean locate_disc(Position a, Disc disc) {
-        if (!isValidMove(a)) return false;
+    public boolean locate_disc(Position pos, Disc disc) {
+        if (!isValidMove(pos)) return false;
 
-        board[a.row()][a.col()] = disc; // Place the disc
-        flip(a, disc); // Flip the opponent discs
+        board[pos.row()][pos.col()] = disc; // Place the disc
+        flip(pos, disc); // Flip the opponent discs
         isPlayeroneturn = !isPlayeroneturn;// Switch turn
         return true;
     }
@@ -244,15 +243,13 @@ private boolean flipRecursive(int row, int col, int rowDir, int colDir, Disc dis
         while (isWithinBounds(row, col)) {
             Disc disc = getDiscAtPosition(new Position(row, col));
 
-            if (disc == null) break;  // No disc found, invalid direction
+            if (disc == null) return false;  // No disc found, invalid direction
 
+            // Found player's disc without opponent in between
             if (!disc.getOwner().equals(player)) {
                 foundOpponentDisc = true;  // Found opponent's disc
-            } else if (foundOpponentDisc) {
-                return true;  // Found player's disc after opponent's, valid move
-            } else {
-                return false;  // Found player's disc without opponent in between
-            }
+            } else
+                return foundOpponentDisc;  // Found player's disc after opponent's, valid move
 
             row += rowDir;
             col += colDir;
