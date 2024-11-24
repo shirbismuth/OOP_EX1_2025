@@ -16,6 +16,7 @@ public class GameLogic implements PlayableLogic {//n
     private static Stack <Move> moves;
 
 
+
     public GameLogic() {
        this.player1 = new HumanPlayer(true);
         this.player2 = new HumanPlayer(false) ;
@@ -30,13 +31,17 @@ public class GameLogic implements PlayableLogic {//n
     }
 
     public void Bomb(Position bomb) {
+
         for (int[] direction : directions) {
             int rowDir = direction[0];
             int colDir = direction[1];
             int row = bomb.row() + rowDir;
             int col = bomb.col() + colDir;
+
             if (isWithinBounds(row, col)) {
-                Disc disc = getDiscAtPosition(new Position(row, col));
+                Position pos=new Position(row, col);
+                Disc disc = getDiscAtPosition(pos);
+                if (disc != null ){
                 if (disc != null && !Objects.equals(disc.getType(), "⭕") && disc.getOwner().isPlayerOne != isFirstPlayerTurn()) {
                     if (Objects.equals(disc.getOwner(), player1)) {
                         board[row][col].setOwner(player2);
@@ -44,9 +49,10 @@ public class GameLogic implements PlayableLogic {//n
                         board[row][col].setOwner(player1);
 
                 }
+
                 if (Objects.equals(disc.getType(), "💣")) {
-                    Bomb(new Position(row, col));
-                }
+                    Bomb(pos);
+                }}
 
             }
 
@@ -66,7 +72,7 @@ public class GameLogic implements PlayableLogic {//n
                     // Flip discs in the direction
                     while (isWithinBounds(row, col) && board[row][col].getOwner() != disc.getOwner()) {
                         board[row][col].setOwner(disc.getOwner());
-                        if (board[row][col].getType().equals("💣")) {
+                        if (board[row][col] !=null &&board[row][col].getType().equals("💣")) {
                             Bomb(new Position(row, col));
                         }
                         row += rowDir;
@@ -193,6 +199,9 @@ private boolean flipRecursive(int row, int col, int rowDir, int colDir, Disc dis
     public Disc getDiscAtPosition(Position position) {
         int col = position.col();
         int row = position.row();
+        if (!isWithinBounds(row, col)) {
+            return null; // מחזיר null אם מחוץ לגבולות
+        }
         return this.board[row][col];
     }
 
