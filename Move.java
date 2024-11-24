@@ -36,6 +36,6 @@ public class Move {
 
 
     public Disc disc() {
-        return null;
+        return disc;
     }
 }

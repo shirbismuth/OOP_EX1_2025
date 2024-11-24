@@ -222,7 +222,6 @@ private boolean flipRecursive(int row, int col, int rowDir, int colDir, Disc dis
             return false;
         }
 
-
         for (int[] direction : directions) {
             int rowDir = direction[0];
             int colDir = direction[1];
@@ -230,7 +229,6 @@ private boolean flipRecursive(int row, int col, int rowDir, int colDir, Disc dis
                 return true;
             }
         }
-
 
         return false;
     }
