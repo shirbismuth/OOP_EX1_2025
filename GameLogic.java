@@ -3,7 +3,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Stack;
 
-public class GameLogic implements PlayableLogic {//n
+public class GameLogic implements PlayableLogic {//לספור ניצחונות, להוסיף את האופציות של הפצצה באופציונלים
     private  Disc[][] board = new Disc[8][8];
     private Player player1;
     private Player player2;
@@ -14,8 +14,11 @@ public class GameLogic implements PlayableLogic {//n
             {1, -1}, {1, 0}, {1, 1}
     };
     private static Stack <Move> moves;
-    private int bombUsageCount = 0; // מספר הפעמים שפצצה הופעלה
-    private final int maxBombUsage = 3; // מספר מרבי של שימושים בפצצו
+    private int bombplayer2 = 3;
+    private  int bombplayer1 = 3;
+    private int unFlippablelayer2 = 2;
+    private int unFlippablelayer1 = 2;
+
 
 
 
@@ -33,11 +36,11 @@ public class GameLogic implements PlayableLogic {//n
     }
 
     public void Bomb(Position bomb) {
-        if (bombUsageCount < maxBombUsage) {
-        ArrayList<Position> processedPositions = new ArrayList<>(); // סט של מיקומים שכבר טופלו
+
+        ArrayList<Position> processedPositions = new ArrayList<>();
         BombRecursive(bomb, processedPositions);
-            bombUsageCount++; // הגדלת מספר השימושים בפצצה
-    }}
+
+    }
     public void BombRecursive(Position bomb,ArrayList<Position> processedPositions) {
         if (processedPositions.contains(bomb)) {
             return; // אם המיקום כבר טופל, אין צורך להמשיך
@@ -140,10 +143,28 @@ private boolean flipRecursive(int row, int col, int rowDir, int colDir, Disc dis
     @Override
     public boolean locate_disc(Position pos, Disc disc) {
         if (!isValidMove(pos)) return false;
+        if (disc.getType().equals("💣") && disc.getOwner().equals(player1) && bombplayer1 == 0) {
+            System.out.println("false you are hara");
+            return false;
+        }
+        if (disc.getType().equals("💣") && disc.getOwner().equals(player2) && bombplayer1==0) {
+            System.out.println("false you are hara");
+            return false;
+
+        }
 
         board[pos.row()][pos.col()] = disc; // Place the disc
+        if (disc.getType().equals("💣") && disc.getOwner().equals(player1)) {
+            bombplayer1--;
+            System.out.println(bombplayer1);
+        }
+        if (disc.getType().equals("💣") && disc.getOwner().equals(player2)){
+            bombplayer2--;
+        System.out.println(bombplayer2);
+        }
         flip(pos, disc); // Flip the opponent discs
         isPlayeroneturn = !isPlayeroneturn;// Switch turn
+
         Disc[][] boardCopy = cloneBoard(board);
         Move move = new Move(boardCopy, pos, disc);
         moves.add(move);
