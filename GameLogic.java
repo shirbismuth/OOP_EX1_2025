@@ -143,25 +143,31 @@ private boolean flipRecursive(int row, int col, int rowDir, int colDir, Disc dis
     @Override
     public boolean locate_disc(Position pos, Disc disc) {
         if (!isValidMove(pos)) return false;
-        if (disc.getType().equals("💣") && disc.getOwner().equals(player1) && bombplayer1 == 0) {
-            System.out.println("false you are hara");
+        int bombsLeft = disc.getOwner().equals(player1) ? bombplayer1 : bombplayer2;
+        if (disc.getType().equals("💣") && bombsLeft == 0) {
             return false;
         }
-        if (disc.getType().equals("💣") && disc.getOwner().equals(player2) && bombplayer1==0) {
-            System.out.println("false you are hara");
-            return false;
 
+        if (disc.getType().equals("💣")) {
+            if (disc.getOwner().equals(player1)) {
+                bombplayer1--;
+            } else {
+                bombplayer2--;
+            }
+        }
+        int UnLeft = disc.getOwner().equals(player1) ? unFlippablelayer1 : unFlippablelayer2;
+        if (disc.getType().equals("⭕") && UnLeft == 0) {
+            return false;
         }
 
+        if (disc.getType().equals("⭕")) {
+            if (disc.getOwner().equals(player1)) {
+                unFlippablelayer1--;
+            } else {
+                unFlippablelayer2--;
+            }
+        }
         board[pos.row()][pos.col()] = disc; // Place the disc
-        if (disc.getType().equals("💣") && disc.getOwner().equals(player1)) {
-            bombplayer1--;
-            System.out.println(bombplayer1);
-        }
-        if (disc.getType().equals("💣") && disc.getOwner().equals(player2)){
-            bombplayer2--;
-        System.out.println(bombplayer2);
-        }
         flip(pos, disc); // Flip the opponent discs
         isPlayeroneturn = !isPlayeroneturn;// Switch turn
 
