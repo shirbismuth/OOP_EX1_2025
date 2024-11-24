@@ -78,7 +78,8 @@ public class GameLogic implements PlayableLogic {//n
                 if (canFlip(row, col, rowDir, colDir, disc)) {
                     // Flip discs in the direction
                     while (isWithinBounds(row, col) && board[row][col].getOwner() != disc.getOwner()) {
-                        board[row][col].setOwner(disc.getOwner());
+                        if (!Objects.equals(disc.getType(), "⭕")){
+                        board[row][col].setOwner(disc.getOwner());}
                         if (board[row][col] !=null &&board[row][col].getType().equals("💣")) {
                             Bomb(new Position(row, col));
                         }
