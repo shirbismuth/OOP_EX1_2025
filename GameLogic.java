@@ -29,9 +29,16 @@ public class GameLogic implements PlayableLogic {//n
         this.player2=player2;
         this.moves= new Stack<Move>();
     }
-
     public void Bomb(Position bomb) {
+        ArrayList<Position> processedPositions = new ArrayList<>(); // סט של מיקומים שכבר טופלו
+        BombRecursive(bomb, processedPositions);
+    }
+    public void BombRecursive(Position bomb,ArrayList<Position> processedPositions) {
+        if (processedPositions.contains(bomb)) {
+            return; // אם המיקום כבר טופל, אין צורך להמשיך
+        }
 
+        processedPositions.add(bomb);
         for (int[] direction : directions) {
             int rowDir = direction[0];
             int colDir = direction[1];
@@ -51,7 +58,7 @@ public class GameLogic implements PlayableLogic {//n
                 }
 
                 if (Objects.equals(disc.getType(), "💣")) {
-                    Bomb(pos);
+                    BombRecursive(pos, processedPositions);
                 }}
 
             }
