@@ -10,6 +10,7 @@ public class GameLogic implements PlayableLogic {//n
     private boolean isPlayeroneturn = true;
     private final int[][] directions = {
             {-1, -1}, {-1, 0}, {-1, 1},
+            {0,-1},            {0,1},
             {1, -1}, {1, 0}, {1, 1}
     };
     private static Stack <Move> moves;
