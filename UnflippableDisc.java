@@ -1,7 +1,12 @@
 public class UnflippableDisc implements Disc{
+    private String type;
     private Player player;
     public UnflippableDisc (Player player){
         this.player=player;
+    }
+    public UnflippableDisc(UnflippableDisc other) {
+        this.type = other.type;
+        this.player = other.player;
     }
 
     @Override

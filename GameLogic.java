@@ -3,8 +3,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Stack;
 
+<<<<<<< HEAD
 public class GameLogic implements PlayableLogic {
     private final Disc[][] board = new Disc[8][8];
+=======
+public class GameLogic implements PlayableLogic {//לספור ניצחונות, להוסיף את האופציות של הפצצה באופציונלים
+    private  Disc[][] board = new Disc[8][8];
+>>>>>>> 994841187bb8203ca81cec36271660cec2e5a4c5
     private Player player1;
     private Player player2;
     private boolean isPlayeroneturn = true;
@@ -15,6 +20,11 @@ public class GameLogic implements PlayableLogic {
             {1, -1}, {1, 0}, {1, 1}
     };
     private static Stack <Move> moves;
+    private int bombplayer2 = 3;
+    private  int bombplayer1 = 3;
+
+
+
 
 
     public GameLogic() {
@@ -50,23 +60,38 @@ public class GameLogic implements PlayableLogic {
     }
 
     public void Bomb(Position bomb) {
+
+        ArrayList<Position> processedPositions = new ArrayList<>();
+        BombRecursive(bomb, processedPositions);
+
+    }
+    public void BombRecursive(Position bomb,ArrayList<Position> processedPositions) {
+        if (processedPositions.contains(bomb)) {
+            return; // אם המיקום כבר טופל, אין צורך להמשיך
+        }
+
+        processedPositions.add(bomb);
         for (int[] direction : directions) {
             int rowDir = direction[0];
             int colDir = direction[1];
             int row = bomb.row() + rowDir;
             int col = bomb.col() + colDir;
+
             if (isWithinBounds(row, col)) {
-                Disc disc = getDiscAtPosition(new Position(row, col));
-                if (disc != null && !Objects.equals(disc.getType(), "⭕") && disc.getOwner().isPlayerOne != isFirstPlayerTurn()) {
+                Position pos=new Position(row, col);
+                Disc disc = getDiscAtPosition(pos);
+                if (disc != null ){
+                if (!Objects.equals(disc.getType(), "⭕") && disc.getOwner().isPlayerOne != isFirstPlayerTurn()) {
                     if (Objects.equals(disc.getOwner(), player1)) {
                         board[row][col].setOwner(player2);
                     } else
                         board[row][col].setOwner(player1);
 
                 }
-                if (Objects.equals(disc.getType(), "💣")) {
-                    Bomb(new Position(row, col));
-                }
+
+                if (disc != null &&Objects.equals(disc.getType(), "💣")) {
+                    BombRecursive(pos, processedPositions);
+                }}
 
             }
 
@@ -86,8 +111,9 @@ public class GameLogic implements PlayableLogic {
                 if (canFlip(row, col, rowDir, colDir, disc)) {
                     // Flip discs in the direction
                     while (isWithinBounds(row, col) && board[row][col].getOwner() != disc.getOwner()) {
-                        board[row][col].setOwner(disc.getOwner());
-                        if (board[row][col].getType().equals("💣")) {
+                        if (!Objects.equals(board[row][col].getType(), "⭕")) {
+                        board[row][col].setOwner(disc.getOwner());}
+                        if (board[row][col] !=null &&board[row][col].getType().equals("💣")) {
                             Bomb(new Position(row, col));
 =======
     public void flip(Position flip, Disc disc) {
@@ -129,47 +155,6 @@ public class GameLogic implements PlayableLogic {
     }
 
 
-//    public void flip(Position P, Disc disc) {
-//        for (int[] direction : directions) {
-//            int rowDir = direction[0];
-//            int colDir = direction[1];
-//            int row = P.row() + rowDir;
-//            int col = P.col() + colDir;
-//
-//            // Ensure we're not out of bounds and the disc we're checking is not of the same color as the placed disc
-//            if (isWithinBounds(row, col) && board[row][col] != null && board[row][col].getOwner() != disc.getOwner()) {
-//
-//                // Call recursive method to check if this direction has flippable discs
-//                if (flipRecursive(row, col, rowDir, colDir, disc)) {
-//                    // Once we know there's a valid sequence, start flipping the discs
-//                    while (board[row][col].getOwner() != disc.getOwner()) {
-//                        // Flip the discs
-//                        board[row][col].setOwner(disc.getOwner());
-//
-//                        // Check if a bomb is encountered and trigger the Bomb logic
-//                        if (board[row][col].getType().equals("💣")) {
-//                            Bomb(new Position(row, col));
-//                        }
-//
-//                        // Move to the next position in the same direction
-//                        row += rowDir;
-//                        col += colDir;
-//                    }
-//                }
-//            }
-//        }
-//    }
-
-
-//    private boolean flipRecursive(int row, int col, int rowDir, int colDir, Disc disc) {
-//        if (!isWithinBounds(row, col) || board[row][col] == null) {
-//            return false;
-//        }
-//        if (board[row][col] == disc) {
-//            return true;
-//        }
-//        return flipRecursive(row + rowDir, col + colDir, rowDir, colDir, disc);
-//    }
 private boolean flipRecursive(int row, int col, int rowDir, int colDir, Disc disc) {
     // Base Case: If out of bounds or empty space, terminate recursion
     if (!isWithinBounds(row, col) || board[row][col] == null) {
@@ -227,36 +212,52 @@ private boolean flipRecursive(int row, int col, int rowDir, int colDir, Disc dis
             return false;
 >>>>>>> Stashed changes
 
+        int bombsLeft = disc.getOwner().equals(player1) ? player1.number_of_bombs : player2.number_of_bombs;
+        if (disc.getType().equals("💣") && bombsLeft == 0) {
+            return false;
+        }
+
+        if (disc.getType().equals("💣")) {
+            if (disc.getOwner().equals(player1)) {
+                player1.number_of_bombs--;
+                System.out.println("bombplayer1=" + player1.number_of_bombs);
+            } else {
+                player2.number_of_bombs--;
+                System.out.println("bombplayer2=" + player2.number_of_bombs);
+            }
+        }
+
+        int UnLeft = disc.getOwner().equals(player1) ?  player1.number_of_unflippedable : player2.number_of_unflippedable;
+        if (disc.getType().equals("⭕") && UnLeft == 0) {
+            return false;
+        }
+
+        if (disc.getType().equals("⭕")) {
+            if (disc.getOwner().equals(player1)) {
+                player1.number_of_unflippedable--;
+            } else {
+                player2.number_of_unflippedable--;
+            }
+        }
         board[pos.row()][pos.col()] = disc; // Place the disc
         flip(pos, disc); // Flip the opponent discs
         isPlayeroneturn = !isPlayeroneturn;// Switch turn
+
+        Disc[][] boardCopy = cloneBoard(board);
+        Move move = new Move(boardCopy, pos, disc);
+        moves.add(move);
+
         return true;
     }
 
-//    public boolean locate_disc(Position a, Disc disc) {
-//
-//        if (!isValidMove(a))
-//            return false;
-//
-//        if (ValidMoves().contains(a))
-//        {  board[a.row()][a.col()] = disc;
-//
-//            isPlayeroneturn = !isPlayeroneturn;
-//            ValidMoves();
-//            flip(a ,disc);
-//            return true;
-//
-//        }
-//       // this.moves.add()
-//        else
-//           return false;
-//
-//    }
 
     @Override
     public Disc getDiscAtPosition(Position position) {
         int col = position.col();
         int row = position.row();
+        if (!isWithinBounds(row, col)) {
+            return null; // מחזיר null אם מחוץ לגבולות
+        }
         return this.board[row][col];
     }
 
@@ -353,46 +354,6 @@ private boolean flipRecursive(int row, int col, int rowDir, int colDir, Disc dis
 
 
 
-
-//    public int countFlips(Position a) {
-//        int flips = 0;
-//
-//        for (int[] direction : directions) {
-//            int rowDir = direction[0];
-//            int colDir = direction[1];
-//            int row = a.row() + rowDir;
-//            int col = a.col() + colDir;
-//            int count = 0;
-//
-//
-//            while (isWithinBounds(row, col)) {
-//                Disc disc = getDiscAtPosition(new Position(row, col));
-//                if (disc == null) break;
-//
-//                if (disc.getOwner().isPlayerOne != isFirstPlayerTurn()) {
-//                    count++;
-//                } else if (disc.getOwner().isPlayerOne == isFirstPlayerTurn()) {
-//                    flips += count;
-//
-//                }
-//
-//                break;
-//            }
-//
-//                row += rowDir;
-//                col += colDir;
-//            }
-//
-//
-//
-//
-//
-//            return flips;
-//
-//        }
-
-
-
     @Override
     public Player getFirstPlayer() {
         return player1;
@@ -424,18 +385,125 @@ private boolean flipRecursive(int row, int col, int rowDir, int colDir, Disc dis
 
     @Override
     public void reset() {
+        for (int i = 0; i < board.length; i++) {
+            for (int j = 0; j < board[i].length; j++) {
+                board[i][j] = null; }
+        }
+        moves.removeAll(moves);
         board[3][3] = new SimpleDisc((player1));
         board[4][4] = new SimpleDisc((player1));
         board[3][4] = new SimpleDisc((player2));
         board[4][3] = new SimpleDisc((player2));
+        Disc[][] boardCopy = cloneBoard(board);
+        Move move = new Move(boardCopy, null, null);
+        moves.add(move);
+
+        player1.number_of_bombs=3;
+        player2.number_of_bombs=3;
+        player1.number_of_unflippedable=2;
+        player2.number_of_unflippedable=2;
+
+        System.out.println("player1 = " + player1.number_of_bombs);
+        System.out.println("player2 = " + player1.number_of_bombs);
 
     }
 
     @Override
     public void undoLastMove() {
+        if (moves.isEmpty() || moves.size() == 1) return; // אין מהלך להחזיר אחורה
+        Move lastMove = moves.get(moves.size() - 1);
+        Disc disc = lastMove.disc();
+        Player corentp =disc.getOwner();
+        if (lastMove.disc() != null && lastMove.disc().getType().equals("💣") ) {
+            corentp.number_of_bombs++;
+            int playerNum = isPlayeroneturn? 1:2;
+            System.out.println("number of bombs left for player: " +playerNum+ "is" + corentp.number_of_bombs);
+//
+//            if (corentp.equals(player1)) {ss
+//                player1.number_of_unflippedable++ ;
+//                System.out.println("bombplayer1=" + player1.number_of_bombs);
+//                System.out.println("disc - "+ lastMove.disc().toString());
+//            }
+//            else {
+//                player2.number_of_bombs++;
+//                System.out.println("bombplayer2=" + player2.number_of_bombs);
+//                System.out.println("disc - "+ lastMove.disc().toString());
+//            }
+        }
 
+        moves.remove(moves.size() - 1);
+        Disc[][] previousBoard = moves.get(moves.size() - 1).getBoardmove();
+        board = cloneBoard(previousBoard);
 
+        isPlayeroneturn = !isPlayeroneturn;
     }
+
+
+
+
+//  public void undoLastMove() {
+//            if (moves.isEmpty() || moves.size() == 1) return;
+//
+//            // השגת המהלך האחרון
+//            Move lastMove = moves.get(moves.size() - 1);
+//
+//            // החזרת פצצות או דיסקים בלתי הפיכים לשחקן המתאים
+//            Disc lastDisc = lastMove.disc();
+//            if (lastDisc != null) {
+//                Player owner = lastDisc.getOwner();
+//
+//                // החזרת פצצה
+//                if (lastDisc.getType().equals("💣")) {
+//                    owner.number_of_bombs++;
+//                }
+//
+//                // החזרת דיסק בלתי הפיך
+//                if (lastDisc.getType().equals("⭕")) {
+//                    owner.number_of_unflippedable++;
+//                }
+//            }
+//
+//            // שחזור מצב הלוח למהלך הקודם
+//            moves.pop(); // הסרת המהלך האחרון
+//            Disc[][] previousBoard = moves.peek().getBoardmove(); // לוח קודם
+//            board = cloneBoard(previousBoard);
+//
+//            // עדכון תור השחקן
+//            isPlayeroneturn = !isPlayeroneturn;
+//
+//            // עדכון סטטיסטיקות נוספות אם צריך
+//            updatePlayerStatistics();
+//
+//            System.out.println("Undo successful, turn switched.");
+//        }
+//
+//        private void updatePlayerStatistics() {
+//            // ניתן להוסיף כאן לוגיקה לשחזור מצב השחקנים אם יש צורך
+//    }
+
+
+    private Disc[][] cloneBoard(Disc[][] board) {
+        Disc[][] clone = new Disc[board.length][board[0].length];
+        for (int i = 0; i < board.length; i++) {
+            for (int j = 0; j < board[i].length; j++) {
+                if (board[i][j] != null) {
+                    Disc originalDisc = board[i][j];
+                    if (originalDisc instanceof SimpleDisc) {
+                        clone[i][j] = new SimpleDisc((SimpleDisc) originalDisc);
+                    } else if (originalDisc instanceof UnflippableDisc) {
+                        clone[i][j] = new UnflippableDisc((UnflippableDisc) originalDisc);
+                    } else if (originalDisc instanceof BombDisc) {
+                        clone[i][j] = new BombDisc((BombDisc) originalDisc);
+                    }
+                } else {
+                    clone[i][j] = null; // אם התא ריק
+                }
+            }
+        }
+        return clone;
+    }
+
+
 }
 
 
