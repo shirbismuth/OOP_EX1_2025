@@ -9,7 +9,7 @@ public class GameLogic implements PlayableLogic {
 =======
 public class GameLogic implements PlayableLogic {//לספור ניצחונות, להוסיף את האופציות של הפצצה באופציונלים
     private  Disc[][] board = new Disc[8][8];
->>>>>>> 994841187bb8203ca81cec36271660cec2e5a4c5
+
     private Player player1;
     private Player player2;
     private boolean isPlayeroneturn = true;
