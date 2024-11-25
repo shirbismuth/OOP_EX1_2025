@@ -412,42 +412,36 @@ private boolean flipRecursive(int row, int col, int rowDir, int colDir, Disc dis
 
     @Override
     public void undoLastMove() {
-        // || moves.size() == 1
         if (moves.isEmpty()) return; // אין מהלך להחזיר אחורה
-        //Move lastMove = moves.get(moves.size() - 1);
+
         Move lastMove = moves.pop();
+        if (lastMove != null && lastMove.position() != null) {
+            Position pos = lastMove.position();
+            board[pos.row()][pos.col()] = null; // מחיקת הדיסק ממיקום זה
+        }
+        if (moves.isEmpty()){
+            reset();}
+        else{
+            board = moves.peek().getBoardmove();}
         if (lastMove != null) {
             isPlayeroneturn = !isPlayeroneturn; // change turn
             Disc disc = lastMove.disc();
-            //Player corentp = disc.getOwner();
+
             Player corentp = isPlayeroneturn ? player1 : player2;
-            // instance
-            //if (lastMove.disc() != null && lastMove.disc().getType().equals("💣")) {
+
             if (disc instanceof BombDisc) { // if disc is "kind of" bomb disc
                 corentp.number_of_bombs++;
-                //int playerNum = isPlayeroneturn ? 1 : 2;
+
                 System.out.println("number of bombs left for player: " + isPlayeroneturn + "is " + corentp.number_of_bombs);
-//
-//            if (corentp.equals(player1)) {ss
-//                player1.number_of_unflippedable++ ;
-//                System.out.println("bombplayer1=" + player1.number_of_bombs);
-//                System.out.println("disc - "+ lastMove.disc().toString());
-//            }
-//            else {
-//                player2.number_of_bombs++;
-//                System.out.println("bombplayer2=" + player2.number_of_bombs);
-//                System.out.println("disc - "+ lastMove.disc().toString());
-//            }
             }
 
-            //moves.remove(moves.size() - 1);
-            //Disc[][] previousBoard = moves.get(moves.size() - 1).getBoardmove();
-            //board = cloneBoard(previousBoard);
 
-            if (moves.isEmpty())
-                reset();
-            else
-                board = moves.peek().getBoardmove();
+
+//            if (moves.isEmpty()){
+//                reset();}
+//            else{
+//                board = moves.peek().getBoardmove();}
+
 
             //isPlayeroneturn = !isPlayeroneturn;
         }
@@ -457,47 +451,43 @@ private boolean flipRecursive(int row, int col, int rowDir, int colDir, Disc dis
     }
 
 
-
-
-//  public void undoLastMove() {
-//            if (moves.isEmpty() || moves.size() == 1) return;
-//
-//            // השגת המהלך האחרון
-//            Move lastMove = moves.get(moves.size() - 1);
-//
-//            // החזרת פצצות או דיסקים בלתי הפיכים לשחקן המתאים
-//            Disc lastDisc = lastMove.disc();
-//            if (lastDisc != null) {
-//                Player owner = lastDisc.getOwner();
-//
-//                // החזרת פצצה
-//                if (lastDisc.getType().equals("💣")) {
-//                    owner.number_of_bombs++;
-//                }
-//
-//                // החזרת דיסק בלתי הפיך
-//                if (lastDisc.getType().equals("⭕")) {
-//                    owner.number_of_unflippedable++;
-//                }
-//            }
-//
-//            // שחזור מצב הלוח למהלך הקודם
-//            moves.pop(); // הסרת המהלך האחרון
-//            Disc[][] previousBoard = moves.peek().getBoardmove(); // לוח קודם
-//            board = cloneBoard(previousBoard);
-//
-//            // עדכון תור השחקן
-//            isPlayeroneturn = !isPlayeroneturn;
-//
-//            // עדכון סטטיסטיקות נוספות אם צריך
-//            updatePlayerStatistics();
-//
-//            System.out.println("Undo successful, turn switched.");
+//    @Override
+//    public void undoLastMove() {
+//        // אם אין מהלך להחזיר
+//        if (moves.isEmpty()) {
+//            System.out.println("No move to undo.");
+//            return;
 //        }
 //
-//        private void updatePlayerStatistics() {
-//            // ניתן להוסיף כאן לוגיקה לשחזור מצב השחקנים אם יש צורך
+//        // הסר את המהלך האחרון מהסטאק
+//        Move lastMove = moves.pop();
+//
+//        // שחזר את מצב הלוח למהלך הקודם אם יש מהלך קודם
+//        if (moves.isEmpty()) {
+//            reset();
+//        } else {
+//            board = cloneBoard(moves.peek().getBoardmove());
+//        }
+//
+//        // עדכון מצב השחקן התורן
+//        isPlayeroneturn = !isPlayeroneturn;
+//
+//        // אם הדיסק שהוסר היה מסוג מיוחד, החזר אותו לשחקן
+//        if (lastMove != null) {
+//            Disc disc = lastMove.disc();
+//            if (disc instanceof BombDisc) {
+//                Player currentPlayer = isPlayeroneturn ? player1 : player2;
+//                currentPlayer.number_of_bombs++;
+//            } else if (disc instanceof UnflippableDisc) {
+//                Player currentPlayer = isPlayeroneturn ? player1 : player2;
+//                currentPlayer.number_of_unflippedable++;
+//            }
+//        }
+//
+//        // הדפסת הודעה לאישור הפעולה
+//        System.out.println("Undo complete. Current player: " + (isPlayeroneturn ? "Player 1" : "Player 2"));
 //    }
+
 
 
     private Disc[][] cloneBoard(Disc[][] board) {
