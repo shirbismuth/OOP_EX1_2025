@@ -342,13 +342,18 @@ private boolean flipRecursive(int row, int col, int rowDir, int colDir, Disc dis
     @Override
     public void undoLastMove() {
         if (moves.isEmpty() || moves.size() == 1) return; // אין מהלך להחזיר אחורה
-        Move lastMove = moves.get(moves.size() - 1);
-        Disc disc = lastMove.disc();
-        Player corentp =disc.getOwner();
-        if (lastMove.disc() != null && lastMove.disc().getType().equals("💣") ) {
-            corentp.number_of_bombs++;
-            int playerNum = isPlayeroneturn? 1:2;
-            System.out.println("number of bombs left for player: " +playerNum+ "is" + corentp.number_of_bombs);
+        //Move lastMove = moves.get(moves.size() - 1);
+        Move lastMove = moves.pop();
+        if (lastMove != null) {
+            Disc disc = lastMove.disc();
+            Player corentp = disc.getOwner();
+            // instance
+            //if (lastMove.disc() != null && lastMove.disc().getType().equals("💣")) {
+            if (disc instanceof BombDisc) { // if disc is "kind of" bomb disc
+                corentp.number_of_bombs++;
+                //int playerNum = isPlayeroneturn ? 1 : 2;
+                isPlayeroneturn = !isPlayeroneturn;
+                System.out.println("number of bombs left for player: " + isPlayeroneturn + "is" + corentp.number_of_bombs);
 //
 //            if (corentp.equals(player1)) {ss
 //                player1.number_of_unflippedable++ ;
@@ -360,13 +365,18 @@ private boolean flipRecursive(int row, int col, int rowDir, int colDir, Disc dis
 //                System.out.println("bombplayer2=" + player2.number_of_bombs);
 //                System.out.println("disc - "+ lastMove.disc().toString());
 //            }
+            }
+
+            //moves.remove(moves.size() - 1);
+            //Disc[][] previousBoard = moves.get(moves.size() - 1).getBoardmove();
+            //board = cloneBoard(previousBoard);
+            board = moves.peek().getBoardmove();
+
+            //isPlayeroneturn = !isPlayeroneturn;
         }
 
-        moves.remove(moves.size() - 1);
-        Disc[][] previousBoard = moves.get(moves.size() - 1).getBoardmove();
-        board = cloneBoard(previousBoard);
-
-        isPlayeroneturn = !isPlayeroneturn;
+        else
+            System.out.println("No move was done");
     }
 
 
