@@ -396,12 +396,14 @@ private boolean flipRecursive(int row, int col, int rowDir, int colDir, Disc dis
         board[4][3] = new SimpleDisc((player2));
         Disc[][] boardCopy = cloneBoard(board);
         Move move = new Move(boardCopy, null, null);
-        moves.add(move);
+        //moves.add(move);
 
         player1.number_of_bombs=3;
         player2.number_of_bombs=3;
         player1.number_of_unflippedable=2;
         player2.number_of_unflippedable=2;
+
+        isPlayeroneturn = true;
 
         System.out.println("player1 = " + player1.number_of_bombs);
         System.out.println("player2 = " + player1.number_of_bombs);
@@ -410,19 +412,21 @@ private boolean flipRecursive(int row, int col, int rowDir, int colDir, Disc dis
 
     @Override
     public void undoLastMove() {
-        if (moves.isEmpty() || moves.size() == 1) return; // אין מהלך להחזיר אחורה
+        // || moves.size() == 1
+        if (moves.isEmpty()) return; // אין מהלך להחזיר אחורה
         //Move lastMove = moves.get(moves.size() - 1);
         Move lastMove = moves.pop();
         if (lastMove != null) {
+            isPlayeroneturn = !isPlayeroneturn; // change turn
             Disc disc = lastMove.disc();
-            Player corentp = disc.getOwner();
+            //Player corentp = disc.getOwner();
+            Player corentp = isPlayeroneturn ? player1 : player2;
             // instance
             //if (lastMove.disc() != null && lastMove.disc().getType().equals("💣")) {
             if (disc instanceof BombDisc) { // if disc is "kind of" bomb disc
                 corentp.number_of_bombs++;
                 //int playerNum = isPlayeroneturn ? 1 : 2;
-                isPlayeroneturn = !isPlayeroneturn;
-                System.out.println("number of bombs left for player: " + isPlayeroneturn + "is" + corentp.number_of_bombs);
+                System.out.println("number of bombs left for player: " + isPlayeroneturn + "is " + corentp.number_of_bombs);
 //
 //            if (corentp.equals(player1)) {ss
 //                player1.number_of_unflippedable++ ;
@@ -439,7 +443,11 @@ private boolean flipRecursive(int row, int col, int rowDir, int colDir, Disc dis
             //moves.remove(moves.size() - 1);
             //Disc[][] previousBoard = moves.get(moves.size() - 1).getBoardmove();
             //board = cloneBoard(previousBoard);
-            board = moves.peek().getBoardmove();
+
+            if (moves.isEmpty())
+                reset();
+            else
+                board = moves.peek().getBoardmove();
 
             //isPlayeroneturn = !isPlayeroneturn;
         }
