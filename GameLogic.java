@@ -396,7 +396,7 @@ private boolean flipRecursive(int row, int col, int rowDir, int colDir, Disc dis
         board[4][3] = new SimpleDisc((player2));
         Disc[][] boardCopy = cloneBoard(board);
         Move move = new Move(boardCopy, null, null);
-        //moves.add(move);
+        moves.add(move);
 
         player1.number_of_bombs=3;
         player2.number_of_bombs=3;
@@ -412,8 +412,8 @@ private boolean flipRecursive(int row, int col, int rowDir, int colDir, Disc dis
 
     @Override
     public void undoLastMove() {
-        if (moves.isEmpty()) return; // אין מהלך להחזיר אחורה
-
+        // if (moves.isEmpty()) return; // אין מהלך להחזיר אחורה
+        if (moves.size()==1) return;
         Move lastMove = moves.pop();
         if (lastMove != null && lastMove.position() != null) {
             Position pos = lastMove.position();
@@ -423,6 +423,7 @@ private boolean flipRecursive(int row, int col, int rowDir, int colDir, Disc dis
             reset();}
         else{
             board = moves.peek().getBoardmove();}
+
         if (lastMove != null) {
             isPlayeroneturn = !isPlayeroneturn; // change turn
             Disc disc = lastMove.disc();
@@ -434,7 +435,6 @@ private boolean flipRecursive(int row, int col, int rowDir, int colDir, Disc dis
 
                 System.out.println("number of bombs left for player: " + isPlayeroneturn + "is " + corentp.number_of_bombs);
             }
-
 
 
 //            if (moves.isEmpty()){
