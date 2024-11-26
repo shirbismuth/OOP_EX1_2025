@@ -256,11 +256,10 @@ private boolean flipRecursive(int row, int col, int rowDir, int colDir, Disc dis
 
         return false;  // No valid flip direction
     }
+
     @Override
     public int countFlips(Position a) {
         int flips = 0;
-        Set<Position> countedPositions = new HashSet<>(); // שמירה על דיסקים שכבר נספרו
-
         for (int[] direction : directions) {
             int rowDir = direction[0];
             int colDir = direction[1];
@@ -269,108 +268,32 @@ private boolean flipRecursive(int row, int col, int rowDir, int colDir, Disc dis
             int count = 0;
 
             while (isWithinBounds(row, col)) {
-                Position pos = new Position(row, col);
-                Disc disc = getDiscAtPosition(pos);
-
-                if (disc == null) break; // אין דיסק, עצור
-                if (!(disc instanceof UnflippableDisc)) {
-                    if (disc.getOwner().isPlayerOne != isFirstPlayerTurn()) {
-                        if (!countedPositions.contains(pos)) {
-                            count++; // מצאנו דיסק יריב שעדיין לא נספר
-                        }
-                        if (disc instanceof BombDisc) {
-                            // הוסף הפיכות מהפצצה, אך עקוב אחרי דיסקים נספרים
-                            flips += count; // הוסף את ההיפוכים עד הפצצה
-                            flips += countBombFlips(pos, countedPositions); // טפל בפצצה
-                            break;
-                        }
-                    } else {
-                        flips += count; // הוסף הפיכות עד דיסק של השחקן
-                        break;
-                    }
-                }
-                row += rowDir;
-                col += colDir;
-            }
-        }
-        return flips;
-    }
-
-    private int countBombFlips(Position bombPos, Set<Position> countedPositions) {
-        int bombFlips = 0;
-        bombFlips += countBombFlipsRecursive(bombPos, countedPositions);
-        return bombFlips;
-    }
-
-    private int countBombFlipsRecursive(Position bombPos, Set<Position> countedPositions) {
-        if (!countedPositions.add(bombPos)) { // הוסף ל-Set אם עוד לא טופל
-            return 0; // אם כבר טופל, אין צורך להמשיך
-        }
-
-        int flips = 0;
-
-        for (int[] direction : directions) {
-            int row = bombPos.row() + direction[0];
-            int col = bombPos.col() + direction[1];
-
-            if (isWithinBounds(row, col)) {
-                Position pos = new Position(row, col);
-                Disc disc = getDiscAtPosition(pos);
-
-                if (disc != null && !(disc instanceof UnflippableDisc)) {
-                    if (disc.getOwner().isPlayerOne != isFirstPlayerTurn()) {
-                        if (countedPositions.add(pos)) {
-                            flips++; // הוסף הפיכה רק אם לא נספר קודם
-                        }
-                    }
-
-                    if (disc instanceof BombDisc) {
-                        flips += countBombFlipsRecursive(pos, countedPositions); // המשך לטפל בפצצות סמוכות
-                    }
-                }
-            }
-        }
-
-        return flips;
-    }
-
-//    @Override
-//    public int countFlips(Position a) {
-//        int flips = 0;
-//        for (int[] direction : directions) {
-//            int rowDir = direction[0];
-//            int colDir = direction[1];
-//            int row = a.row() + rowDir;
-//            int col = a.col() + colDir;
-//            int count = 0;
-//
-//            while (isWithinBounds(row, col)) {
-//                Disc disc = getDiscAtPosition(new Position(row, col));
-//                if (disc == null) break; // No disc, stop counting
-//                   if (!(disc instanceof UnflippableDisc)){
-//                       if (disc.getOwner().isPlayerOne != isFirstPlayerTurn()) {
-//                           count++; // Opponent disc found
-//                        //   flips += count;
+                Disc disc = getDiscAtPosition(new Position(row, col));
+                if (disc == null) break; // No disc, stop counting
+                   if (!(disc instanceof UnflippableDisc)){
+                       if (disc.getOwner().isPlayerOne != isFirstPlayerTurn()) {
+                           count++; // Opponent disc found
+                        //   flips += count;
 //                           if (disc instanceof BombDisc){
 //                               count = countBombFlips(new Position(row, col)); // חשב היפוכים מהפצצה
 //                               flips += count; // הוסף את ההיפוכים מהפצצה
 //                               break; // הפסק את הבדיקה בכיוון זה
 //                           }
-//
-//                       } else {
-//                        flips += count; // Player's disc found after opponent discs
-//                            break;
-//                       }
-//                   }
-//                     row += rowDir;
-//                     col += colDir;
-//                     }
-//                }
-//        return flips;
-//
-//
-//     }
-//    // מתודה עזר לחישוב היפוכים בעקבות פצצה
+
+                       } else {
+                        flips += count; // Player's disc found after opponent discs
+                            break;
+                       }
+                   }
+                     row += rowDir;
+                     col += colDir;
+                     }
+                }
+        return flips;
+
+
+     }
+    // מתודה עזר לחישוב היפוכים בעקבות פצצה
 //    private int countBombFlips(Position bombPos) {
 //        int bombFlips = 0;
 //        ArrayList<Position> processedPositions = new ArrayList<>();
