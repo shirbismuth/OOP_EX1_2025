@@ -56,7 +56,7 @@ public class GameLogic implements PlayableLogic {//לספור ניצחונות, 
                 Position pos=new Position(row, col);
                 Disc disc = getDiscAtPosition(pos);
                 if (disc != null ){
-                if (!Objects.equals(disc.getType(), "⭕") && disc.getOwner().isPlayerOne != isFirstPlayerTurn()) {
+                  if (!Objects.equals(disc.getType(), "⭕") && disc.getOwner().isPlayerOne != isFirstPlayerTurn()) {
                     if (Objects.equals(disc.getOwner(), player1)) {
                         board[row][col].setOwner(player2);
                     } else
@@ -141,14 +141,18 @@ private boolean flipRecursive(int row, int col, int rowDir, int colDir, Disc dis
 
     @Override
     public boolean locate_disc(Position pos, Disc disc) {
-        if (!isValidMove(pos)) return false;
 
+        if (!isValidMove(pos)) return false;
+//        if (moves.size() > 1) {
+//            Move move = moves.pop();
+//            moves.push(move);
+//        }
         int bombsLeft = disc.getOwner().equals(player1) ? player1.number_of_bombs : player2.number_of_bombs;
-        if (disc.getType().equals("💣") && bombsLeft == 0) {
+        if (disc instanceof BombDisc && bombsLeft == 0) {
             return false;
         }
 
-        if (disc.getType().equals("💣")) {
+        if (disc instanceof BombDisc) {
             if (disc.getOwner().equals(player1)) {
                 player1.number_of_bombs--;
                 System.out.println("bombplayer1=" + player1.number_of_bombs);
@@ -159,15 +163,17 @@ private boolean flipRecursive(int row, int col, int rowDir, int colDir, Disc dis
         }
 
         int UnLeft = disc.getOwner().equals(player1) ?  player1.number_of_unflippedable : player2.number_of_unflippedable;
-        if (disc.getType().equals("⭕") && UnLeft == 0) {
+        if (disc instanceof UnflippableDisc && UnLeft == 0) {
             return false;
         }
 
-        if (disc.getType().equals("⭕")) {
+        if (disc instanceof UnflippableDisc) {
             if (disc.getOwner().equals(player1)) {
                 player1.number_of_unflippedable--;
+                System.out.println("Unply1=" + player1.number_of_unflippedable);
             } else {
                 player2.number_of_unflippedable--;
+                System.out.println("Unply2=" + player2.number_of_unflippedable);
             }
         }
         board[pos.row()][pos.col()] = disc; // Place the disc
@@ -176,7 +182,7 @@ private boolean flipRecursive(int row, int col, int rowDir, int colDir, Disc dis
 
         Disc[][] boardCopy = cloneBoard(board);
         Move move = new Move(boardCopy, pos, disc);
-        moves.add(move);
+        moves.push(move);//#################
 
         return true;
     }
@@ -265,18 +271,66 @@ private boolean flipRecursive(int row, int col, int rowDir, int colDir, Disc dis
             while (isWithinBounds(row, col)) {
                 Disc disc = getDiscAtPosition(new Position(row, col));
                 if (disc == null) break; // No disc, stop counting
-                if (disc.getOwner().isPlayerOne != isFirstPlayerTurn()) {
-                    count++; // Opponent disc found
-                } else {
-                    flips += count; // Player's disc found after opponent discs
-                    break;
+                   if (!(disc instanceof UnflippableDisc)){
+                       if (disc.getOwner().isPlayerOne != isFirstPlayerTurn()) {
+                           count++; // Opponent disc found
+                           if (disc instanceof BombDisc){
+                               //דflips += count;
+                               count = countBombFlips(new Position(row, col)); // חשב היפוכים מהפצצה
+                               flips += count; // הוסף את ההיפוכים מהפצצה
+                               break; // הפסק את הבדיקה בכיוון זה
+                           }
+
+                       } else {
+                        flips += count; // Player's disc found after opponent discs
+                            break;
+                       }
+                   }
+                     row += rowDir;
+                     col += colDir;
+                     }
                 }
-                row += rowDir;
-                col += colDir;
-            }
-        }
         return flips;
     }
+    // מתודה עזר לחישוב היפוכים בעקבות פצצה
+    private int countBombFlips(Position bombPos) {
+        int bombFlips = 0;
+        ArrayList<Position> processedPositions = new ArrayList<>();
+        bombFlips += countBombFlipsRecursive(bombPos, processedPositions);
+        return bombFlips;
+    }
+
+    private int countBombFlipsRecursive(Position bombPos, ArrayList<Position> processedPositions) {
+        if (processedPositions.contains(bombPos)) {
+            return 0; // אם המיקום כבר טופל, אין צורך להמשיך
+        }
+
+        processedPositions.add(bombPos);
+        int flips = 0;
+
+        for (int[] direction : directions) {
+            int row = bombPos.row() + direction[0];
+            int col = bombPos.col() + direction[1];
+
+            if (isWithinBounds(row, col)) {
+                Position pos = new Position(row, col);
+                Disc disc = getDiscAtPosition(pos);
+
+                if (disc != null && !(disc instanceof UnflippableDisc)) {
+                    if (disc.getOwner().isPlayerOne != isFirstPlayerTurn()) {
+                        flips++; // דיסק שהופך בעקבות הפצצה
+                    }
+
+                    if (disc instanceof BombDisc) {
+                        flips += countBombFlipsRecursive(pos, processedPositions); // המשך חישוב לפצצות סמוכות
+                    }
+                }
+            }
+        }
+
+        return flips;
+    }
+
 
 
     private boolean isWithinBounds(int row, int col) {
@@ -346,6 +400,7 @@ private boolean flipRecursive(int row, int col, int rowDir, int colDir, Disc dis
         if (moves.size()==1) return; // אין מהלך להחזיר אחורה
 
         Move lastMove = moves.pop();
+
         if (lastMove != null && lastMove.position() != null) {
             Position pos = lastMove.position();
             board[pos.row()][pos.col()] = null; // מחיקת הדיסק ממיקום זה
@@ -353,13 +408,20 @@ private boolean flipRecursive(int row, int col, int rowDir, int colDir, Disc dis
         if (moves.isEmpty())
             reset();
             else{
-            board = moves.peek().getBoardmove();}
+
+            board = cloneBoard(moves.peek().getBoardmove());}
+         //   board = moves.peek().getBoardmove();}
 
         if (lastMove != null) {
             isPlayeroneturn = !isPlayeroneturn; // change turn
             Disc disc = lastMove.disc();
 
             Player corentp = isPlayeroneturn ? player1 : player2;
+            if (disc instanceof UnflippableDisc) { // if disc is "kind of" bomb disc
+                corentp.number_of_unflippedable++;
+
+                System.out.println("number of bombs left for player: " + isPlayeroneturn + "is " + corentp.number_of_unflippedable);
+            }
 
             if (disc instanceof BombDisc) { // if disc is "kind of" bomb disc
                 corentp.number_of_bombs++;
@@ -367,57 +429,11 @@ private boolean flipRecursive(int row, int col, int rowDir, int colDir, Disc dis
                 System.out.println("number of bombs left for player: " + isPlayeroneturn + "is " + corentp.number_of_bombs);
             }
 
-
-//            if (moves.isEmpty()){
-//                reset();}
-//            else{
-//                board = moves.peek().getBoardmove();}
-
-
-            //isPlayeroneturn = !isPlayeroneturn;
         }
 
         else
             System.out.println("No move was done");
     }
-
-
-//    @Override
-//    public void undoLastMove() {
-//        // אם אין מהלך להחזיר
-//        if (moves.isEmpty()) {
-//            System.out.println("No move to undo.");
-//            return;
-//        }
-//
-//        // הסר את המהלך האחרון מהסטאק
-//        Move lastMove = moves.pop();
-//
-//        // שחזר את מצב הלוח למהלך הקודם אם יש מהלך קודם
-//        if (moves.isEmpty()) {
-//            reset();
-//        } else {
-//            board = cloneBoard(moves.peek().getBoardmove());
-//        }
-//
-//        // עדכון מצב השחקן התורן
-//        isPlayeroneturn = !isPlayeroneturn;
-//
-//        // אם הדיסק שהוסר היה מסוג מיוחד, החזר אותו לשחקן
-//        if (lastMove != null) {
-//            Disc disc = lastMove.disc();
-//            if (disc instanceof BombDisc) {
-//                Player currentPlayer = isPlayeroneturn ? player1 : player2;
-//                currentPlayer.number_of_bombs++;
-//            } else if (disc instanceof UnflippableDisc) {
-//                Player currentPlayer = isPlayeroneturn ? player1 : player2;
-//                currentPlayer.number_of_unflippedable++;
-//            }
-//        }
-//
-//        // הדפסת הודעה לאישור הפעולה
-//        System.out.println("Undo complete. Current player: " + (isPlayeroneturn ? "Player 1" : "Player 2"));
-//    }
 
 
 
@@ -441,7 +457,6 @@ private boolean flipRecursive(int row, int col, int rowDir, int colDir, Disc dis
         }
         return clone;
     }
-
 
 }
 
