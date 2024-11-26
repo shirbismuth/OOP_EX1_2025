@@ -3,19 +3,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Stack;
 
-<<<<<<< HEAD
-public class GameLogic implements PlayableLogic {
-    private final Disc[][] board = new Disc[8][8];
-=======
 public class GameLogic implements PlayableLogic {//לספור ניצחונות, להוסיף את האופציות של הפצצה באופציונלים
     private  Disc[][] board = new Disc[8][8];
-
     private Player player1;
     private Player player2;
     private boolean isPlayeroneturn = true;
     private final int[][] directions = {
             {-1, -1}, {-1, 0}, {-1, 1},
-<<<<<<< Updated upstream
             {0,-1},            {0,1},
             {1, -1}, {1, 0}, {1, 1}
     };
@@ -38,25 +32,6 @@ public class GameLogic implements PlayableLogic {//לספור ניצחונות, 
         this.player1=player1;
         this.player2=player2;
         this.moves= new Stack<Move>();
-=======
-            {0, -1}, {0, 1},
-            {1, -1}, {1, 0}, {1, 1}
-    };
-    private Stack<Move> moves;
-
-
-    public GameLogic() {
-        this.player1 = new HumanPlayer(true);
-        this.player2 = new HumanPlayer(false);
-        this.isPlayeroneturn = true;
-    }
-
-    public GameLogic(Player player1, Player player2) {
-        this.player1 = player1;
-        this.player2 = player2;
-        this.isPlayeroneturn = true;
-
->>>>>>> Stashed changes
     }
 
     public void Bomb(Position bomb) {
@@ -98,7 +73,6 @@ public class GameLogic implements PlayableLogic {//לספור ניצחונות, 
         }
     }
 
-<<<<<<< Updated upstream
     public void flip(Position P, Disc disc) {
         for (int[] direction : directions) {
             int rowDir = direction[0];
@@ -115,23 +89,6 @@ public class GameLogic implements PlayableLogic {//לספור ניצחונות, 
                         board[row][col].setOwner(disc.getOwner());}
                         if (board[row][col] !=null &&board[row][col].getType().equals("💣")) {
                             Bomb(new Position(row, col));
-=======
-    public void flip(Position flip, Disc disc) {
-        for (int[] direction : directions) {
-            int rowDir = direction[0];
-            int colDir = direction[1];
-            int row = flip.row() + rowDir;
-            int col = flip.col() + colDir;
-            if (isWithinBounds(row, col) && board[row][col].getOwner() != disc.getOwner()) {
-                if (flipRecursive(row, col, rowDir, colDir, disc)) {
-                    while (board[row][col].getOwner() != disc.getOwner()) {
-                        if (disc.getOwner() == player1) {
-                            board[row][col].setOwner(player1);
-                        } else
-                            board[row][col].setOwner(player2);
-                        if ( Objects.equals( board[row][col].getType(), "💣")){
-                            Bomb(new Position(row ,col));
->>>>>>> Stashed changes
                         }
                         row += rowDir;
                         col += colDir;
@@ -141,7 +98,6 @@ public class GameLogic implements PlayableLogic {//לספור ניצחונות, 
         }
     }
 
-<<<<<<< Updated upstream
     // Helper Method: Check if discs can be flipped in a specific direction
     private boolean canFlip(int row, int col, int rowDir, int colDir, Disc disc) {
         while (isWithinBounds(row, col)) {
@@ -178,39 +134,14 @@ private boolean flipRecursive(int row, int col, int rowDir, int colDir, Disc dis
     return false;
 }
 
-=======
-
-            private boolean flipRecursive(int row, int col, int rowDir, int colDir, Disc disc) {
-                if (!isWithinBounds(row, col) || board[row][col] == null) {
-                    return false;
-                }
-                if (board[row][col] == disc) {
-                    return true;
-                }
-                return flipRecursive(row + rowDir, col + colDir, rowDir, colDir, disc);
-            }
->>>>>>> Stashed changes
 
 
 
 
 
     @Override
-<<<<<<< Updated upstream
     public boolean locate_disc(Position pos, Disc disc) {
         if (!isValidMove(pos)) return false;
-=======
-    public boolean locate_disc(Position a, Disc disc) {
-        if (ValidMoves().contains(a)) {
-            flip(a, disc);
-            return true;
-        }
-            isPlayeroneturn = !isPlayeroneturn;
-            return true;
-        }
-        else
-            return false;
->>>>>>> Stashed changes
 
         int bombsLeft = disc.getOwner().equals(player1) ? player1.number_of_bombs : player2.number_of_bombs;
         if (disc.getType().equals("💣") && bombsLeft == 0) {
@@ -412,16 +343,16 @@ private boolean flipRecursive(int row, int col, int rowDir, int colDir, Disc dis
 
     @Override
     public void undoLastMove() {
-        // if (moves.isEmpty()) return; // אין מהלך להחזיר אחורה
-        if (moves.size()==1) return;
+        if (moves.size()==1) return; // אין מהלך להחזיר אחורה
+
         Move lastMove = moves.pop();
         if (lastMove != null && lastMove.position() != null) {
             Position pos = lastMove.position();
             board[pos.row()][pos.col()] = null; // מחיקת הדיסק ממיקום זה
         }
-        if (moves.isEmpty()){
-            reset();}
-        else{
+        if (moves.isEmpty())
+            reset();
+            else{
             board = moves.peek().getBoardmove();}
 
         if (lastMove != null) {
