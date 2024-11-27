@@ -11,8 +11,7 @@ public class GameLogic implements PlayableLogic {//לספור ניצחונות, 
             {1, -1}, {1, 0}, {1, 1}
     };
     private static Stack <Move> moves;
-    private int bombplayer2 = 3;
-    private  int bombplayer1 = 3;
+
 
 
 
@@ -109,42 +108,10 @@ public class GameLogic implements PlayableLogic {//לספור ניצחונות, 
     }
 
 
-//private boolean flipRecursive(int row, int col, int rowDir, int colDir, Disc disc) {
-//    // Base Case: If out of bounds or empty space, terminate recursion
-//    if (!isWithinBounds(row, col) || board[row][col] == null) {
-//        return false;
-//    }
-//
-//    // Base Case: If we find the current player's disc, sequence is valid
-//    if (board[row][col].getOwner().equals(disc.getOwner())) {
-//        return true;
-//    }
-//
-//    // Recursive Case: Keep traversing in the current direction
-//    if (flipRecursive(row + rowDir, col + colDir, rowDir, colDir, disc)) {
-//        // Flip the current disc if recursion returns true
-//        board[row][col].setOwner(disc.getOwner());
-//        System.out.println("Flipped disc at: (" + row + ", " + col + ")");
-//        return true;
-//    }
-//
-//    // If no valid sequence, return false
-//    return false;
-//}
-
-
-
-
-
-
     @Override
     public boolean locate_disc(Position pos, Disc disc) {
 
         if (!isValidMove(pos)) return false;
-//        if (moves.size() > 1) {
-//            Move move = moves.pop();
-//            moves.push(move);
-//        }
         int bombsLeft = disc.getOwner().equals(player1) ? player1.number_of_bombs : player2.number_of_bombs;
         if (disc instanceof BombDisc && bombsLeft == 0) {
             return false;
@@ -180,7 +147,7 @@ public class GameLogic implements PlayableLogic {//לספור ניצחונות, 
 
         Disc[][] boardCopy = cloneBoard(board);
         Move move = new Move(boardCopy, pos, disc);
-        moves.push(move);//#################
+        moves.push(move);
 
         return true;
     }
@@ -259,65 +226,45 @@ public class GameLogic implements PlayableLogic {//לספור ניצחונות, 
 
     @Override
     public int countFlips(Position a) {
-        int flips = 0;
+        Set<Position> allpos = new HashSet<>();
         for (int[] direction : directions) {
-            int rowDir = direction[0];
-            int colDir = direction[1];
-            int row = a.row() + rowDir;
-            int col = a.col() + colDir;
-            int count = 0;
+            int row = a.row() + direction[0];
+            int col = a.col() + direction[1];
+            Set<Position> addpos = new HashSet<>();
 
             while (isWithinBounds(row, col)) {
-                Position pos = new Position(row,col);
+                Position pos = new Position(row, col);
                 Disc disc = getDiscAtPosition(pos);
                 if (disc == null) break; // No disc, stop counting
-                if (!(disc instanceof UnflippableDisc)) {
-                    if (disc.getOwner().isPlayerOne != isFirstPlayerTurn()) {
-                         if (disc instanceof BombDisc){
-                             count += countBombFlips(pos);}
-                        else {
-                             count++;
-                             System.out.println(pos.toString());
-                         }
-                        //     flips += count;
-//                           if (disc instanceof BombDisc){
-//                               count = countBombFlips(new Position(row, col)); // חשב היפוכים מהפצצה
-//                               flips += count; // הוסף את ההיפוכים מהפצצה
-//                               break; // הפסק את הבדיקה בכיוון זה
-//                           }
-
-                    } else {
-                        flips += count; // Player's disc found after opponent discs
-                        break;
+                if (disc.getOwner().isPlayerOne != isFirstPlayerTurn()) {
+                    if (!(disc instanceof UnflippableDisc)) {
+                        addpos.add(pos);
+                        if (disc instanceof BombDisc)
+                            countBombFlips(pos, addpos);
                     }
+                } else {
+                    allpos.addAll(addpos); // Player's disc found after opponent discs
+                    break;
                 }
-                row += rowDir;
-                col += colDir;
+
+                row += direction[0];
+                col += direction[1];
             }
+
+
         }
-        System.out.println("pos: "+ a.toString() + "flip: "+ flips );
-        return flips;
-
-
-     }
-    // מתודה עזר לחישוב היפוכים בעקבות פצצה
-    private int countBombFlips(Position bombPos) {
-        ArrayList<Position> processedPositions = new ArrayList<>();
-        ArrayList<Position> Boom = new ArrayList<>();
-        ArrayList<Position> bombFlips = countBombFlipsRecursive(bombPos, processedPositions , Boom);
-        System.out.println("pos boom" +bombPos + "flip: "+ bombFlips);
-        return bombFlips.size();
+        return allpos.size();
     }
 
-    private ArrayList<Position> countBombFlipsRecursive(Position bombPos, ArrayList<Position> processedPositions, ArrayList<Position> Boom) {
-        if (Boom.contains(bombPos)) {
-            return null; // אם המיקום כבר טופל, אין צורך להמשיך
-        }
-
-        Boom.add(bombPos);
-        processedPositions.add(bombPos);
 
 
+    // מתודה עזר לחישוב היפוכים בעקבות פצצה
+    private int countBombFlips(Position bombPos, Set<Position> setbom) {
+        countBombFlipsRecursive(bombPos, setbom);
+        return setbom.size();
+    }
+
+    private void countBombFlipsRecursive(Position bombPos,Set<Position> setbom) {
 
         for (int[] direction : directions) {
             int row = bombPos.row() + direction[0];
@@ -326,58 +273,20 @@ public class GameLogic implements PlayableLogic {//לספור ניצחונות, 
              if (isWithinBounds(row, col)) {
                 Position pos = new Position(row, col);
                 Disc disc = getDiscAtPosition(pos);
-
+                if (setbom.contains(pos)) continue;
                 if (disc != null && !(disc instanceof UnflippableDisc)) {
-                    if (disc.getOwner().isPlayerOne != isFirstPlayerTurn() && !processedPositions.contains(pos)) {
-                        processedPositions.add(pos);
+                    if (disc.getOwner().isPlayerOne != isFirstPlayerTurn() ) {
+                        setbom.add(pos);
+                    }
+                    if (disc instanceof BombDisc ) {
+                         countBombFlipsRecursive(pos,setbom); // המשך חישוב לפצצות סמוכות
                     }
 
-                    if (disc instanceof BombDisc ) {
-                         countBombFlipsRecursive(pos, processedPositions, Boom); // המשך חישוב לפצצות סמוכות
-                    }
-                    break;
                 }
             }
         }
 
-        return processedPositions;
     }
-//    public void Bomb(Position bomb) {
-//
-//        ArrayList<Position> processedPositions = new ArrayList<>();
-//        BombRecursive(bomb, processedPositions);
-//
-//
-//    }
-//    public void BombRecursive(Position bomb,ArrayList<Position> processedPositions) {
-//        if (processedPositions.contains(bomb)) {
-//            return; // אם המיקום כבר טופל, אין צורך להמשיך
-//        }
-//        processedPositions.add(bomb);
-//        for (int[] direction : directions) {
-//            int rowDir = direction[0];
-//            int colDir = direction[1];
-//            int row = bomb.row() + rowDir;
-//            int col = bomb.col() + colDir;
-//
-//            if (isWithinBounds(row, col)) {
-//                Position pos=new Position(row, col);
-//                Disc disc = getDiscAtPosition(pos);
-//                if (disc != null ){
-//                    if (!Objects.equals(disc.getType(), "⭕") && disc.getOwner().isPlayerOne != isFirstPlayerTurn()) {
-//
-//
-//                    }
-//
-//                    if (disc != null &&Objects.equals(disc.getType(), "💣")) {
-//                        BombRecursive(pos, processedPositions);
-//                    }}
-//
-//            }
-//
-//        }
-//    }
-
 
     private boolean isWithinBounds(int row, int col) {
         return row >= 0 && row < this.board.length && col >= 0 && col < this.board[0].length;
@@ -408,10 +317,39 @@ public class GameLogic implements PlayableLogic {//לספור ניצחונות, 
 
     @Override
     public boolean isGameFinished() {
-        if (ValidMoves().isEmpty()){
-            return true;
+        if (!ValidMoves().isEmpty()){
+            return false;
         }
-        return false;
+        int player1Count = 0;
+        int player2Count = 0;
+
+            for (int i = 0; i < board.length; i++) {
+                for (int j = 0; j < board[i].length; j++) {
+                    Disc disc = board[i][j];
+                    if (disc != null) {
+                        if (disc.getOwner().equals(player1)) {
+                            player1Count++;
+                        } else if (disc.getOwner().equals(player2)) {
+                            player2Count++;
+                        }
+                    }
+                }
+            }
+
+            if (player1Count > player2Count) {
+                player1.wins++;
+                System.out.println("Player 1 wins with "+player1Count+ " discs! Player 2 had "+player2Count + " discs");
+            } else if (player2Count > player1Count) {
+                player2.wins++;
+                System.out.println("Player 2 wins with "+player2Count+ " discs! Player 1 had "+player1Count + " discs");
+            } else {
+                System.out.println("It's a tie!");
+                return true;
+            }
+
+
+
+        return true;
     }
 
     @Override

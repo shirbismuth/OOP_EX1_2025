@@ -1,3 +1,5 @@
+import java.util.Objects;
+
 public class Position {
     private int row;
     private int col;
@@ -18,6 +20,9 @@ public class Position {
         if (o == null || getClass() != o.getClass()) return false;
         Position position = (Position) o;
         return row == position.row && col == position.col;
+    }
+    public int hashCode() {
+        return Objects.hash(row, col);
     }
 
     public int row() {
