@@ -225,7 +225,7 @@ public class GameLogic implements PlayableLogic {//לספור ניצחונות, 
     }
 
     @Override
-    public int countFlips(Position a) {
+    public int countFlips(Position a) {//ss
         Set<Position> allpos = new HashSet<>();
         for (int[] direction : directions) {
             int row = a.row() + direction[0];
