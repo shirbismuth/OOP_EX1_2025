@@ -14,9 +14,6 @@ public class GameLogic implements PlayableLogic {//לספור ניצחונות, 
 
 
 
-
-
-
     public GameLogic() {
        this.player1 = new HumanPlayer(true);
         this.player2 = new HumanPlayer(false) ;
@@ -59,8 +56,10 @@ public class GameLogic implements PlayableLogic {//לספור ניצחונות, 
                   if (!Objects.equals(disc.getType(), "⭕") && disc.getOwner().isPlayerOne != isFirstPlayerTurn()) {
                     if (Objects.equals(disc.getOwner(), player1)) {
                         board[row][col].setOwner(player2);
+                        System.out.println("Player 2 flipped the "+disc.getType()+"in ("+row+","+col+")"); ///**
                     } else
                         board[row][col].setOwner(player1);
+                      System.out.println("Player 1 flipped the "+disc.getType()+"in ("+row+","+col+")"); ///**
 
                 }
 
@@ -87,6 +86,12 @@ public class GameLogic implements PlayableLogic {//לספור ניצחונות, 
                     while (isWithinBounds(row, col) && board[row][col].getOwner() != disc.getOwner()) {
                         if (!Objects.equals(board[row][col].getType(), "⭕")) {
                         board[row][col].setOwner(disc.getOwner());}
+                        if (disc.getOwner()==player1){
+                            System.out.println("Player 1 flipped the "+ board[row][col].getType()+"in ("+row+","+col+")"); ///**
+                        }else {
+                            System.out.println("Player 1 flipped the "+ board[row][col].getType()+"in ("+row+","+col+")"); ///**
+                        }
+
                         if (board[row][col] !=null &&board[row][col].getType().equals("💣")) {
                             Bomb(new Position(row, col));
                         }
@@ -145,17 +150,18 @@ public class GameLogic implements PlayableLogic {//לספור ניצחונות, 
             }
         }
         board[pos.row()][pos.col()] = disc; // Place the disc
-        flip(pos, disc); // Flip the opponent discs
         if (disc.getOwner().equals(player1)) {
-            System.out.println("Player 1 placed a "+disc.getOwner()+"("+ pos.row()+","+pos.col()+")");
+            System.out.println("Player 1 placed a "+ disc.getType()+" in ("+ pos.row()+","+pos.col()+")");
         } else {
-            System.out.println("Player 2 placed a "+disc.getOwner()+"("+ pos.row()+","+pos.col()+")");
+            System.out.println("Player 2 placed a "+disc.getType()+" in ("+ pos.row()+","+pos.col()+")");
         }
+        flip(pos, disc); // Flip the opponent discs
         isPlayeroneturn = !isPlayeroneturn;// Switch turn
 
         Disc[][] boardCopy = cloneBoard(board);
         Move move = new Move(boardCopy, pos, disc);
         moves.push(move);
+        System.out.println( ""); ///**
 
         return true;
     }
@@ -391,13 +397,17 @@ public class GameLogic implements PlayableLogic {//לספור ניצחונות, 
 
     @Override
     public void undoLastMove() {
-        if (moves.size()==1) return; // אין מהלך להחזיר אחורה
+        System.out.println("Undoing last move:");
+        if (moves.size()==1) {
+            System.out.println("\tNo previous move available to undo.");
+            return;}// אין מהלך להחזיר אחורה
 
         Move lastMove = moves.pop();
 
         if (lastMove != null && lastMove.position() != null) {
             Position pos = lastMove.position();
-            board[pos.row()][pos.col()] = null; // מחיקת הדיסק ממיקום זה
+            board[pos.row()][pos.col()] = null; //// מחיקת הדיסק ממיקום זה
+            System.out.println("\tUndo: removing"+lastMove.disc().getType()+"fron ("+pos.row()+","+pos.col()+")"); ///**
         }
         if (moves.isEmpty())
             reset();
@@ -414,19 +424,18 @@ public class GameLogic implements PlayableLogic {//לספור ניצחונות, 
             if (disc instanceof UnflippableDisc) { // if disc is "kind of" bomb disc
                 corentp.number_of_unflippedable++;
 
-                System.out.println("number of bombs left for player: " + isPlayeroneturn + "is " + corentp.number_of_unflippedable);
+                //System.out.println("number of bombs left for player: " + isPlayeroneturn + "is " + corentp.number_of_unflippedable);
             }
 
             if (disc instanceof BombDisc) { // if disc is "kind of" bomb disc
                 corentp.number_of_bombs++;
 
-                System.out.println("number of bombs left for player: " + isPlayeroneturn + "is " + corentp.number_of_bombs);
+               // System.out.println("number of bombs left for player: " + isPlayeroneturn + "is " + corentp.number_of_bombs);
             }
 
-        }
-
-        else
-            System.out.println("No move was done");
+        } else{
+            System.out.println("No move was done");}
+        System.out.println("");
     }
 
 
