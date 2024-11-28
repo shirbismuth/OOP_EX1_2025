@@ -7,28 +7,40 @@ public class GreedyAI extends AIPlayer {
     }
 
     @Override
-<<<<<<< HEAD
-    public Move makeMove(PlayableLogic gameStatus)
-    {
-        return null;
-=======
-    public Move makeMove(PlayableLogic gameStatus) {
-        if (gameStatus.ValidMoves() == null) {// איו מהלכים חוקיים
+    public Move makeMove(PlayableLogic gameStatus) {////vg
+        List<Position> validPos = gameStatus.ValidMoves();
+
+        if (validPos == null) {// איו מהלכים חוקיים
             return null;
         }
-        List<Position> validPositions = gameStatus.ValidMoves(); // קבלת כל הפוזיציות האפשריות
-        GameLogic gameLogic = new GameLogic()
-        Disc[][] board = gameStatus.();
-        Move bestMove = null;
-        int maxFlipped = 0;
-        for (Position position : validPositions) {
-            // חשב את מספר הדיסקיות שיהפכו במהלך הזה
-            int flippedDiscs = gameLogic.countFlips(position);
+        Player currentPlayer = gameStatus.isFirstPlayerTurn() ? gameStatus.getFirstPlayer() : gameStatus.getSecondPlayer();
+        Disc currentDisc = new SimpleDisc(currentPlayer);
+        Position bestpos = null;
+        int maxFlips = 0;
+        for (Position position : validPos) {
+            int flips = gameStatus.countFlips(position);
+            if (flips > maxFlips) {
+                maxFlips = flips;
+                bestpos = position;
+            }
+            if (flips == maxFlips) {
+                if (position.col() > bestpos.col()) {
+                    bestpos = position;
+                } else if (position.col() == bestpos.col()) {
+                    // השוואה לפי "ימינה" (עמודה גדולה יותר)
+                    if (position.row() > bestpos.row()) {
+                        bestpos = position;
+                    }
+                }
+            }
+        }
+            // ביצוע המהלך
+            if (bestpos != null){
+                gameStatus.locate_disc(bestpos, currentDisc);
+                return new Move( bestpos, currentDisc);
+            }
 
-        }return null;
-    }
-    }
->>>>>>> 4330f7b6f0e969f90c1083b7d876b37e7d1f22f0
+            return null;
     }
 }
 
