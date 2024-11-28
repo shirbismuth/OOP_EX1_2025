@@ -29,6 +29,9 @@ public class GameLogic implements PlayableLogic {//לספור ניצחונות, 
         this.player2=player2;
         this.moves= new Stack<Move>();
     }
+    public  Disc[][] getBoard(){
+        return this.board;
+    }
 
     public void Bomb(Position bomb) {
 
@@ -143,6 +146,11 @@ public class GameLogic implements PlayableLogic {//לספור ניצחונות, 
         }
         board[pos.row()][pos.col()] = disc; // Place the disc
         flip(pos, disc); // Flip the opponent discs
+        if (disc.getOwner().equals(player1)) {
+            System.out.println("Player 1 placed a "+disc.getOwner()+"("+ pos.row()+","+pos.col()+")");
+        } else {
+            System.out.println("Player 2 placed a "+disc.getOwner()+"("+ pos.row()+","+pos.col()+")");
+        }
         isPlayeroneturn = !isPlayeroneturn;// Switch turn
 
         Disc[][] boardCopy = cloneBoard(board);
@@ -168,7 +176,7 @@ public class GameLogic implements PlayableLogic {//לספור ניצחונות, 
         return 8;
     }
 
-    @Override
+    @Override   //reteurns a list of all possible options
     public List<Position> ValidMoves() {
         List<Position> validPositions = new ArrayList<>();
         for (int row = 0; row < board.length; row++) {
@@ -188,7 +196,9 @@ public class GameLogic implements PlayableLogic {//לספור ניצחונות, 
         if (getDiscAtPosition(position) != null) {
             return false;
         }
-
+        if (countFlips(position)==0){
+            return false;
+        }
         for (int[] direction : directions) {
             int rowDir = direction[0];
             int colDir = direction[1];
