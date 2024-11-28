@@ -7,7 +7,7 @@ public class GreedyAI extends AIPlayer {
     }
 
     @Override
-    public Move makeMove(PlayableLogic gameStatus) {////vg
+    public Move makeMove(PlayableLogic gameStatus) {
         List<Position> validPos = gameStatus.ValidMoves();
 
         if (validPos == null) {// איו מהלכים חוקיים
