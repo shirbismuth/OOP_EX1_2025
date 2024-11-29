@@ -1,6 +1,6 @@
 import java.util.*;
 
-public class GameLogic implements PlayableLogic {
+public class GameLogic implements PlayableLogic {//,
     private  Disc[][] board = new Disc[8][8];
     private Player player1;
     private Player player2;
