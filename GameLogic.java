@@ -1,6 +1,6 @@
 import java.util.*;
 
-public class GameLogic implements PlayableLogic {//לספור ניצחונות, להוסיף את האופציות של הפצצה באופציונלים
+public class GameLogic implements PlayableLogic {
     private  Disc[][] board = new Disc[8][8];
     private Player player1;
     private Player player2;
@@ -11,6 +11,8 @@ public class GameLogic implements PlayableLogic {//לספור ניצחונות, 
             {1, -1}, {1, 0}, {1, 1}
     };
     private static Stack <Move> moves;
+    private static  Set<Position> setflip = new HashSet<>();
+    private static Stack <Set<Position>> StackOfSetPosition;
 
 
 
@@ -19,6 +21,7 @@ public class GameLogic implements PlayableLogic {//לספור ניצחונות, 
         this.player2 = new HumanPlayer(false) ;
         this.isPlayeroneturn =true;
         this.moves= new Stack<Move>();
+        this.StackOfSetPosition =new Stack<Set<Position>>();
     }
 
     public GameLogic(Player player1,Player player2){
@@ -39,7 +42,7 @@ public class GameLogic implements PlayableLogic {//לספור ניצחונות, 
     }
     public void BombRecursive(Position bomb,ArrayList<Position> processedPositions) {
         if (processedPositions.contains(bomb)) {
-            return; // אם המיקום כבר טופל, אין צורך להמשיך
+            return;
         }
 
         processedPositions.add(bomb);
@@ -56,16 +59,15 @@ public class GameLogic implements PlayableLogic {//לספור ניצחונות, 
                   if (!Objects.equals(disc.getType(), "⭕") && disc.getOwner().isPlayerOne != isFirstPlayerTurn()) {
                     if (Objects.equals(disc.getOwner(), player1)) {
                         board[row][col].setOwner(player2);
-                        System.out.println("Player 2 flipped the "+disc.getType()+"in ("+row+","+col+")"); ///**
+                        setflip.add(pos);
                     } else
                         board[row][col].setOwner(player1);
-                      System.out.println("Player 1 flipped the "+disc.getType()+"in ("+row+","+col+")"); ///**
+                    setflip.add(pos);
+                  }
 
-                }
-
-                if (disc != null &&Objects.equals(disc.getType(), "💣")) {
+                  if (disc != null &&Objects.equals(disc.getType(), "💣")) {
                     BombRecursive(pos, processedPositions);
-                }}
+                } }
 
             }
 
@@ -83,22 +85,22 @@ public class GameLogic implements PlayableLogic {//לספור ניצחונות, 
                 // Check if discs can be flipped in this direction
                 if (canFlip(row, col, rowDir, colDir, disc)) {
                     // Flip discs in the direction
+
                     while (isWithinBounds(row, col) && board[row][col].getOwner() != disc.getOwner()) {
                         if (!Objects.equals(board[row][col].getType(), "⭕")) {
-                        board[row][col].setOwner(disc.getOwner());}
-                        if (disc.getOwner()==player1){
-                            System.out.println("Player 1 flipped the "+ board[row][col].getType()+"in ("+row+","+col+")"); ///**
-                        }else {
-                            System.out.println("Player 1 flipped the "+ board[row][col].getType()+"in ("+row+","+col+")"); ///**
+                            board[row][col].setOwner(disc.getOwner());
+                            Position position = new Position(row, col);
+                            setflip.add(position);
                         }
 
-                        if (board[row][col] !=null &&board[row][col].getType().equals("💣")) {
+                        if (board[row][col] != null && board[row][col].getType().equals("💣")) {
                             Bomb(new Position(row, col));
                         }
                         row += rowDir;
                         col += colDir;
                     }
                 }
+
             }
         }
     }
@@ -116,15 +118,15 @@ public class GameLogic implements PlayableLogic {//לספור ניצחונות, 
     }
 
 
+
     @Override
     public boolean locate_disc(Position pos, Disc disc) {
-
+        setflip.clear();
         if (!isValidMove(pos)) return false;
         int bombsLeft = disc.getOwner().equals(player1) ? player1.number_of_bombs : player2.number_of_bombs;
         if (disc instanceof BombDisc && bombsLeft == 0) {
             return false;
         }
-
         if (disc instanceof BombDisc) {
             if (disc.getOwner().equals(player1)) {
                 player1.number_of_bombs--;
@@ -161,12 +163,36 @@ public class GameLogic implements PlayableLogic {//לספור ניצחונות, 
         Disc[][] boardCopy = cloneBoard(board);
         Move move = new Move(boardCopy, pos, disc);
         moves.push(move);
+        printflip(setflip);
+        Set<Position> copySet = new HashSet<>(setflip);
+        StackOfSetPosition.add(copySet);
         System.out.println( ""); ///**
 
         return true;
     }
 
+public void printflip(Set<Position> setflip){
+    for (Position position : setflip) {
+        Disc discflip = board[position.row()][position.col()];
+        if (discflip.getOwner().equals(player1)) {
+            System.out.println("Player 1 flipped the " + discflip.getType() + " in (" + position.row() + "," + position.col() + ")");
+        }  if (discflip.getOwner().equals(player2)){
+            System.out.println("Player 2 flipped the " + discflip.getType() + " in (" + position.row() + "," + position.col() + ")");
+        }
 
+    }
+}
+    public void printundo(Set<Position> setflip){
+        for (Position position : setflip) {
+            Disc discflip = board[position.row()][position.col()];
+            if (discflip.getOwner().equals(player1)) {
+                System.out.println("\tUndo: flipping back " + discflip.getType() + " in (" + position.row() + "," + position.col() + ")");
+            }  if (discflip.getOwner().equals(player2)){
+                System.out.println("\tUndo: flipping back " + discflip.getType() + " in (" + position.row() + "," + position.col() + ")");
+            }
+
+        }
+    }
     @Override
     public Disc getDiscAtPosition(Position position) {
         int col = position.col();
@@ -269,6 +295,8 @@ public class GameLogic implements PlayableLogic {//לספור ניצחונות, 
 
 
         }
+
+
         return allpos.size();
     }
 
@@ -390,25 +418,25 @@ public class GameLogic implements PlayableLogic {//לספור ניצחונות, 
 
         isPlayeroneturn = true;
 
-        System.out.println("player1 = " + player1.number_of_bombs);
-        System.out.println("player2 = " + player1.number_of_bombs);
-
     }
 
     @Override
     public void undoLastMove() {
+        if (!player1.isHuman() || !player2.isHuman()) return;
         System.out.println("Undoing last move:");
         if (moves.size()==1) {
             System.out.println("\tNo previous move available to undo.");
             return;}// אין מהלך להחזיר אחורה
 
         Move lastMove = moves.pop();
+        Set<Position> lastset = StackOfSetPosition.pop();
 
         if (lastMove != null && lastMove.position() != null) {
             Position pos = lastMove.position();
             board[pos.row()][pos.col()] = null; //// מחיקת הדיסק ממיקום זה
-            System.out.println("\tUndo: removing"+lastMove.disc().getType()+"fron ("+pos.row()+","+pos.col()+")"); ///**
+            System.out.println("\tUndo: removing "+lastMove.disc().getType()+" fron ("+pos.row()+","+pos.col()+")"); ///**
         }
+        printundo(lastset);
         if (moves.isEmpty())
             reset();
             else{
@@ -424,13 +452,12 @@ public class GameLogic implements PlayableLogic {//לספור ניצחונות, 
             if (disc instanceof UnflippableDisc) { // if disc is "kind of" bomb disc
                 corentp.number_of_unflippedable++;
 
-                //System.out.println("number of bombs left for player: " + isPlayeroneturn + "is " + corentp.number_of_unflippedable);
             }
 
             if (disc instanceof BombDisc) { // if disc is "kind of" bomb disc
                 corentp.number_of_bombs++;
 
-               // System.out.println("number of bombs left for player: " + isPlayeroneturn + "is " + corentp.number_of_bombs);
+
             }
 
         } else{
