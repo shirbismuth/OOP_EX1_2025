@@ -6,6 +6,8 @@ public class Move {
     private Disc[][] boardmove;
 
 
+
+
     public Move(Disc[][] boardmove,Position position,Disc disc) {
         this.boardmove = boardmove;
         this.position = position;
