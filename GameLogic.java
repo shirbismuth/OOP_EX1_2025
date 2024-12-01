@@ -1,18 +1,19 @@
 import java.util.*;
 
-public class GameLogic implements PlayableLogic {//
+public class GameLogic implements PlayableLogic {
     private  Disc[][] board = new Disc[8][8];
     private Player player1;
     private Player player2;
-    private boolean isPlayeroneturn = true;
-    private final int[][] directions = {
+    private boolean isPlayeroneturn = true; // Indicates whose turn it is (true for player1, false for player2)
+
+    private final int[][] directions = { // Directions for flipping discs (8 directions)
             {-1, -1}, {-1, 0}, {-1, 1},
             {0,-1},            {0,1},
             {1, -1}, {1, 0}, {1, 1}
     };
-    private static Stack <Move> moves;
-    private static  Set<Position> setflip = new HashSet<>();
-    private static Stack <Set<Position>> StackOfSetPosition;
+    private static Stack <Move> moves; // Stack to store the history of moves made during the game
+    private static  Set<Position> setflip = new HashSet<>(); // Set to track positions that have been flipped
+    private static Stack <Set<Position>> StackOfSetPosition; // Stack to store the history of flipped positions
 
 
 
@@ -33,13 +34,25 @@ public class GameLogic implements PlayableLogic {//
         return this.board;
     }
 
+    /**
+     * Handles the bomb action when a player places a bomb on the board.
+     * It recursively processes the bomb's effect on surrounding positions.
+     *
+     * @param bomb The position of the bomb being placed.
+     */
     public void Bomb(Position bomb) {
 
         ArrayList<Position> processedPositions = new ArrayList<>();
         BombRecursive(bomb, processedPositions);
 
-
     }
+    /**
+     * Recursively processes the bomb's effect on surrounding positions.
+     * If a bomb is found, the method will recursively call itself to process neighboring bombs.
+     *
+     * @param bomb The current position of the bomb being processed.
+     * @param processedPositions List of positions that have already been processed to prevent infinite loops.
+     */
     public void BombRecursive(Position bomb,ArrayList<Position> processedPositions) {
         if (processedPositions.contains(bomb)) {
             return;
@@ -64,7 +77,7 @@ public class GameLogic implements PlayableLogic {//
                         board[row][col].setOwner(player1);
                     setflip.add(pos);
                   }
-
+                    // Recursively process if a bomb is found at the position
                   if (disc != null &&Objects.equals(disc.getType(), "💣")) {
                     BombRecursive(pos, processedPositions);
                 } }
@@ -73,6 +86,13 @@ public class GameLogic implements PlayableLogic {//
 
         }
     }
+    /**
+     * Flips the opponent's discs in all directions from the specified position.
+     * The discs are flipped if they form a valid chain according to the game rules.
+     *
+     * @param P The position of the disc to flip.
+     * @param disc The disc to flip the opponent's discs with.
+     */
 
     public void flip(Position P, Disc disc) {
         for (int[] direction : directions) {
@@ -94,7 +114,7 @@ public class GameLogic implements PlayableLogic {//
                         }
 
                         if (board[row][col] != null && board[row][col].getType().equals("💣")) {
-                            Bomb(new Position(row, col));
+                            Bomb(new Position(row, col)); // Trigger bomb if found
                         }
                         row += rowDir;
                         col += colDir;
@@ -122,10 +142,11 @@ public class GameLogic implements PlayableLogic {//
     @Override
     public boolean locate_disc(Position pos, Disc disc) {
         setflip.clear();
-        if (!isValidMove(pos)) return false;
+        if (!isValidMove(pos)) return false; // If the move is not valid, return false
+        // Handle special discs like bombs or unflippable discs
         int bombsLeft = disc.getOwner().equals(player1) ? player1.number_of_bombs : player2.number_of_bombs;
         if (disc instanceof BombDisc && bombsLeft == 0) {
-            return false;
+            return false; // No bombs left to place
         }
         if (disc instanceof BombDisc) {
             if (disc.getOwner().equals(player1)) {
@@ -136,7 +157,7 @@ public class GameLogic implements PlayableLogic {//
                 System.out.println("bombplayer2=" + player2.number_of_bombs);
             }
         }
-
+        // Handle unflippable discs
         int UnLeft = disc.getOwner().equals(player1) ?  player1.number_of_unflippedable : player2.number_of_unflippedable;
         if (disc instanceof UnflippableDisc && UnLeft == 0) {
             return false;
@@ -151,6 +172,7 @@ public class GameLogic implements PlayableLogic {//
                 System.out.println("Unply2=" + player2.number_of_unflippedable);
             }
         }
+
         board[pos.row()][pos.col()] = disc; // Place the disc
         if (disc.getOwner().equals(player1)) {
             System.out.println("Player 1 placed a "+ disc.getType()+" in ("+ pos.row()+","+pos.col()+")");
@@ -170,7 +192,12 @@ public class GameLogic implements PlayableLogic {//
 
         return true;
     }
-
+    /**
+     * Prints a message for each disc flipped during a move.
+     *
+     * @param setflip A set of Position objects representing the locations
+     *                of the flipped discs on the board.
+     */
 public void printflip(Set<Position> setflip){
     for (Position position : setflip) {
         Disc discflip = board[position.row()][position.col()];
@@ -182,6 +209,12 @@ public void printflip(Set<Position> setflip){
 
     }
 }
+    /**
+     * Prints a message for each disc flipped back during an undo operation.
+     *
+     * @param setflip A set of Position objects representing the locations
+     *                of the discs that were flipped back on the board.
+     **/
     public void printundo(Set<Position> setflip){
         for (Position position : setflip) {
             Disc discflip = board[position.row()][position.col()];
@@ -193,12 +226,15 @@ public void printflip(Set<Position> setflip){
 
         }
     }
-    @Override
+/**
+ * Retrieves the disc located at the specified position on the board.
+ **/
+ @Override
     public Disc getDiscAtPosition(Position position) {
         int col = position.col();
         int row = position.row();
         if (!isWithinBounds(row, col)) {
-            return null; // מחזיר null אם מחוץ לגבולות
+            return null;
         }
         return this.board[row][col];
     }
@@ -222,8 +258,12 @@ public void printflip(Set<Position> setflip){
 
         return validPositions;
     }
-
-    private boolean isValidMove (Position position) {
+    /**
+     * Determines all valid moves for the current player on the board.
+     * A move is considered valid if placing a disc at the position will
+     * capture at least one opponent's disc according to the game's rules.
+     **/
+     private boolean isValidMove (Position position) {
 
         if (getDiscAtPosition(position) != null) {
             return false;
@@ -302,19 +342,22 @@ public void printflip(Set<Position> setflip){
 
 
 
-    // מתודה עזר לחישוב היפוכים בעקבות פצצה
+
     private int countBombFlips(Position bombPos, Set<Position> setbom) {
         countBombFlipsRecursive(bombPos, setbom);
         return setbom.size();
     }
-
+    /**
+     * Recursively calculates all positions of discs that will be flipped as a result of a bomb disc's explosion.
+     * Bomb discs trigger chain reactions, affecting all adjacent discs and potentially other bomb discs.
+     **/
     private void countBombFlipsRecursive(Position bombPos,Set<Position> setbom) {
 
         for (int[] direction : directions) {
             int row = bombPos.row() + direction[0];
             int col = bombPos.col() + direction[1];
 
-             if (isWithinBounds(row, col)) {
+             if (isWithinBounds(row, col)) { // Ensures the position is within the board boundaries.
                 Position pos = new Position(row, col);
                 Disc disc = getDiscAtPosition(pos);
                 if (setbom.contains(pos)) continue;
@@ -323,7 +366,8 @@ public void printflip(Set<Position> setflip){
                         setbom.add(pos);
                     }
                     if (disc instanceof BombDisc ) {
-                         countBombFlipsRecursive(pos,setbom); // המשך חישוב לפצצות סמוכות
+                        // Recursively triggers the explosion effect for adjacent bomb discs.
+                         countBombFlipsRecursive(pos,setbom);
                     }
 
                 }
@@ -358,7 +402,16 @@ public void printflip(Set<Position> setflip){
     public boolean isFirstPlayerTurn() {
         return isPlayeroneturn;
     }
-
+    /**
+     * Determines whether the game is finished.
+     * - Checks if there are any valid moves left. If so, the game is not finished.
+     * - If no moves are left, counts the discs on the board for each player.
+     * - Declares the winner based on the higher disc count or determines a tie.
+     * - Updates the win count for the winning player.
+     *
+     * @return `true` if the game is finished, `false` otherwise.
+     * Outputs the result of the game to the console.
+     */
     @Override
     public boolean isGameFinished() {
         if (!ValidMoves().isEmpty()){
@@ -395,7 +448,14 @@ public void printflip(Set<Position> setflip){
 
         return true;
     }
-
+    /**
+     * Resets the game board to its initial state.
+     * - Clears the board by setting all positions to `null`.
+     * - Reinitializes the starting four discs at the center of the board.
+     * - Creates an initial move to preserve the starting board state.
+     * - Resets the number of special discs (BombDisc and UnflippableDisc) for both players.
+     * - Sets the turn to Player 1.
+     */
     @Override
     public void reset() {
         for (int i = 0; i < board.length; i++) {
@@ -419,21 +479,28 @@ public void printflip(Set<Position> setflip){
         isPlayeroneturn = true;
 
     }
+    /**
+     * Reverts the last move performed in the game.
+     * - If no moves have been made, or if one of the players is not human, the action is skipped.
+     * - Removes the last placed disc from the board and restores the previous game state.
+     * - Updates the special disc counts for the current player (BombDisc and UnflippableDisc).
+     * - Reverses all flips caused by the last move.
 
+     */
     @Override
     public void undoLastMove() {
         if (!player1.isHuman() || !player2.isHuman()) return;
         System.out.println("Undoing last move:");
         if (moves.size()==1) {
             System.out.println("\tNo previous move available to undo.");
-            return;}// אין מהלך להחזיר אחורה
+            return;}
 
         Move lastMove = moves.pop();
         Set<Position> lastset = StackOfSetPosition.pop();
 
         if (lastMove != null && lastMove.position() != null) {
             Position pos = lastMove.position();
-            board[pos.row()][pos.col()] = null; //// מחיקת הדיסק ממיקום זה
+            board[pos.row()][pos.col()] = null;
             System.out.println("\tUndo: removing "+lastMove.disc().getType()+" fron ("+pos.row()+","+pos.col()+")"); ///**
         }
         printundo(lastset);
@@ -465,8 +532,15 @@ public void printflip(Set<Position> setflip){
         System.out.println("");
     }
 
-
-
+    /**
+     * Creates a deep copy of the current game board.
+     * - Iterates through each cell in the board.
+     * - For each disc, creates a new instance of its respective type (SimpleDisc, BombDisc, UnflippableDisc).
+     * - Ensures that the copied board is independent of the original board.
+     *
+     * @param board The current game board to be cloned.
+     * @return A new 2D array representing the cloned board state.
+     */
     private Disc[][] cloneBoard(Disc[][] board) {
         Disc[][] clone = new Disc[board.length][board[0].length];
         for (int i = 0; i < board.length; i++) {
@@ -481,7 +555,7 @@ public void printflip(Set<Position> setflip){
                         clone[i][j] = new BombDisc((BombDisc) originalDisc);
                     }
                 } else {
-                    clone[i][j] = null; // אם התא ריק
+                    clone[i][j] = null;
                 }
             }
         }

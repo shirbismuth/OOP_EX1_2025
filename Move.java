@@ -1,5 +1,10 @@
 
-
+/**
+ * Represents a move in the game, containing information about:
+ * - The position of the move.
+ * - The disc used for the move.
+ * - A snapshot of the board state after the move.
+ */
 public class Move {
     private Position position;
     private  Disc disc;
@@ -31,12 +36,11 @@ public class Move {
     public Disc[][] getBoardmove(){
         return this.boardmove;
     }
+    //Gets the position of the move.
     public Position position(){
         return this.position;
     }
-    //public Disc getDisc(){return this.disc;}
-
-
+    //Gets the disc used in the move.
     public Disc disc() {
         return disc;
     }

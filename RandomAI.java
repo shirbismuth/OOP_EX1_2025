@@ -10,14 +10,14 @@ public class RandomAI extends AIPlayer {
         super(isPlayerOne);
         initializeDiscCounts();
     }
+    // Initialize the counts of different disc types at the start of the game.
     private void initializeDiscCounts() {
-        // אתחול כמויות הדיסקים בתחילת המשחק
-        availableDiscs.put(SimpleDisc.class, Integer.MAX_VALUE); // דיסק רגיל תמיד זמין
+        availableDiscs.put(SimpleDisc.class, Integer.MAX_VALUE);
         availableDiscs.put(BombDisc.class, number_of_bombs);
         availableDiscs.put(UnflippableDisc.class, number_of_unflippedable);
     }
 
-
+    // Method to make a random move based on the game status.
     @Override
     public Move makeMove(PlayableLogic gameStatus) {
         List<Position> optionsPos = gameStatus.ValidMoves();
@@ -35,6 +35,7 @@ public class RandomAI extends AIPlayer {
         Move randomMove = new Move(bourd,Positionrandom,discRandom);
         return randomMove;
     }
+    // Method to select a random disc type from the available discs.
     public  Disc choosediscRandom (){
         List<Class<? extends Disc>> availableTipe = new ArrayList<>();
 
